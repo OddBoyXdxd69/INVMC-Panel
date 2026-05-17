@@ -931,6 +931,35 @@ router.post(
   },
 );
 
+router.post("/admin/settings/change/logo-url", isAdmin, async (req, res) => {
+  const { logoUrl } = req.body;
+  try {
+    let settings = (await db.get("settings")) || {};
+    settings.logoUrl = logoUrl;
+    await db.set("settings", settings);
+    await db.set("logo", true); // Ensure logo is enabled if URL is set
+    res.redirect("/admin/settings?msg=LogoUpdated");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Database error");
+  }
+});
+
+router.post("/admin/settings/social", isAdmin, async (req, res) => {
+  const { github, discord, support } = req.body;
+  try {
+    let settings = (await db.get("settings")) || {};
+    settings.github = github;
+    settings.discord = discord;
+    settings.support = support;
+    await db.set("settings", settings);
+    res.redirect("/admin/settings?msg=SocialUpdated");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Database error");
+  }
+});
+
 router.post("/admin/settings/change/name", isAdmin, async (req, res) => {
   const name = req.body.name;
   try {

@@ -148,6 +148,7 @@ app.use(async (req, res, next) => {
   try {
     const settings = await db.get("settings");
 
+    res.locals.settings = settings;
     res.locals.languages = getLanguages();
     res.locals.ogTitle = config.ogTitle;
     res.locals.ogDescription = config.ogDescription;
