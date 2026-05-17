@@ -1,34 +1,71 @@
+<p align="center">
+  <img src="https://i.ibb.co/mrHNJD2y/WB-2.png" width="96" height="96" alt="INVMC Logo">
+</p>
 
 <h1 align="center">INVMC Panel</h1>
-## Overview
 
-## Installation
-1. Clone the repository or download:
-`git clone https://github.com/OddBoyXD/invmc-panel`
+<p align="center">
+  The core web interface for the INVMC management suite. A modern, fast, and secure frontend for your gaming infrastructure.
+</p>
 
-` curl -sL https://deb.nodesource.com/setup_23.x | sudo bash - `
+<p align="center">
+  <img src="https://img.shields.io/badge/Component-Frontend-blue?style=flat-square" alt="Component">
+  <img src="https://img.shields.io/badge/Framework-Node.js-indigo?style=flat-square" alt="Framework">
+  <img src="https://img.shields.io/badge/Author-OddBoyXD-blue?style=flat-square" alt="Author">
+</p>
 
-`apt-get install nodejs git`
+---
 
-3. go to panel directory:
-`cd invmc-panel`
+## 🚀 Features
 
-4. Install some importent:
-`apt install zip -y && unzip panel.zip`
+- **Dynamic UI**: Fully responsive and themed with a professional dark mode.
+- **Unified Settings**: Change logos, links, and names directly from the Admin panel.
+- **Server Control**: Real-time console, file management, and power controls.
+- **Multi-Game Support**: Optimized for Minecraft, Discord Bots, and more.
 
-5. Install dependencies:
-`npm install && npm run seed && npm run createUser`
+## 🛠️ Manual Installation
 
-6. Start the Panel:
-`node . # or use pm2 to keep it online`
+If you are not using the main `invmc.sh` installer, you can set up the panel manually:
 
-## Contributing
-Contributions to enhance the functionality or performance of the INVMCPanel are encouraged. Please submit pull requests for any enhancements.
+1. **Install Node.js 22**:
+   ```bash
+   curl -sL https://deb.nodesource.com/setup_22.x | sudo bash -
+   sudo apt-get install -y nodejs
+   ```
 
-## License
-(c) 2025 Hopingboyz . This software is licensed under the MIT License.
+2. **Clone and Enter Directory**:
+   ```bash
+   git clone https://github.com/OddBoyXdxd69/INVMC-Panel
+   cd INVMC-Panel/panel
+   ```
 
+3. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
 
+4. **Initialize Database**:
+   ```bash
+   npm run seed
+   npm run createUser
+   ```
 
+5. **Start with PM2**:
+   ```bash
+   npm install pm2 -g
+   pm2 start index.js --name "invmc-panel"
+   ```
 
-- made by hopingboyz
+## 📂 Structure
+
+- `index.js`: Main entry point.
+- `/views`: EJS templates for the frontend.
+- `/routes`: Express route handlers.
+- `/handlers`: Database and utility handlers.
+- `/storage`: Local database and theme configuration.
+
+---
+
+<p align="center">
+  © 2026 INVMC | Developed by <b>OddBoyXD</b>
+</p>
