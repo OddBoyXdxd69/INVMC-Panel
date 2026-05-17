@@ -117,7 +117,26 @@
 <script>
   // Improved copy to clipboard function with feedback
   function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => {
+    // Fallback for non-secure contexts
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    
+    let success = false;
+    try {
+      success = document.execCommand('copy');
+    } catch (err) {
+      success = false;
+    }
+    
+    document.body.removeChild(textArea);
+
+    if (success || (navigator.clipboard && navigator.clipboard.writeText)) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text);
+      }
+      
       // Show toast notification
       const toast = document.createElement('div');
       toast.className = 'fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg text-sm flex items-center gap-2 z-50 animate-fade-in';
@@ -134,10 +153,9 @@
         toast.classList.add('opacity-0', 'transition-opacity', 'duration-300');
         setTimeout(() => toast.remove(), 300);
       }, 3000);
-    }).catch(err => {
-      console.error('Failed to copy: ', err);
+    } else {
       alert('Failed to copy API key to clipboard');
-    });
+    }
   }
 
   // Create API Key
