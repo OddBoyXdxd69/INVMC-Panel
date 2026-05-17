@@ -52,7 +52,7 @@
       }
       %>
    <div class="bg-transparent">
-      <div class="sm:flex sm:items-center px-4 sm:px-8 pt-4">
+      <div class="sm:flex sm:items-center px-2 sm:px-4 sm:px-8 pt-4">
          <div class="sm:flex-auto">
          </div>
          <% let query = req.query.path ? '?path=' + encodeURIComponent(req.query.path) : ''; %>
@@ -75,9 +75,9 @@
       </div>
    </div>
    <%- include('../components/instance') %>
-   <div class="px-2 sm:px-6 lg:px-8">
+   <div class="px-2 sm:px-6 lg:px-4 sm:px-8">
       <div class="flex items-center justify-between mb-4">
-         <div class="flex-grow overflow-x-auto whitespace-nowrap">
+         <div class="flex-grow overflow-x-auto whitespace-nowrap scrollbar-hide">
             <h1 class="text-white text-sm">
                <a class="text-neutral-300 hover:text-neutral-200 transition" href="./files">/app/data/</a>
                <% 
@@ -131,7 +131,7 @@
       </div>
 
       <div class="overflow-x-auto border border-white/5 shadow rounded-xl">
-         <table class="min-w-full divide-y divide-white/5">
+         <div class="overflow-x-auto w-full"><table class="min-w-full divide-y divide-white/5" style="table-layout: fixed; width: 100%;">
             <thead class="bg-white/5">
                <tr>
                   <th scope="col" class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider">
@@ -148,10 +148,10 @@
                   <% let currentPath = req.query.path ? req.query.path + '/' : ''; %>
                   <% let extension = req.query.path ? '?path=' + encodeURIComponent(req.query.path) : ''; %>
                   <tr class="hover:bg-white/2.5 transition">
-                     <td class="px-3 sm:px-6 py-3 whitespace-nowrap">
+                     <td class="px-3 sm:px-6 py-3 whitespace-nowrap overflow-hidden text-ellipsis">
                         <input type="checkbox" class="form-checkbox h-4 w-4 text-neutral-500 bg-white/5 border border-white/10 rounded focus:ring-offset-neutral-800 focus:ring-neutral-700 transition focus:border-none file-checkbox" data-filename="<%= directory.name %>">
                      </td>
-                     <td class="px-3 sm:px-6 py-3 whitespace-nowrap">
+                     <td class="px-3 sm:px-6 py-3 whitespace-nowrap overflow-hidden text-ellipsis">
                         <a href="/instance/<%= req.params.id %>/files?path=<%= currentPath %><%= encodeURIComponent(directory.name) %>" class="flex items-center group">
                            <span class="mr-2 sm:mr-3 flex-shrink-0">
                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-yellow-400">
@@ -195,10 +195,10 @@
                      let extension = req.query.path ? '?path=' + encodeURIComponent(req.query.path) : ''; 
                   %>
                   <tr class="hover:bg-white/2.5 transition">
-                     <td class="px-3 sm:px-6 py-3 whitespace-nowrap">
+                     <td class="px-3 sm:px-6 py-3 whitespace-nowrap overflow-hidden text-ellipsis">
                         <input type="checkbox" class="form-checkbox h-4 w-4 text-neutral-500 bg-white/5 border border-white/10 rounded focus:ring-offset-neutral-800 focus:ring-neutral-700 transition focus:border-none file-checkbox" data-filename="<%= file.name %>">
                      </td>
-                     <td class="px-3 sm:px-6 py-3 whitespace-nowrap">
+                     <td class="px-3 sm:px-6 py-3 whitespace-nowrap overflow-hidden text-ellipsis">
                         <a href="/instance/<%= req.params.id %>/files/view/<%= encodeURIComponent(file.name) %><%= extension %>" class="flex items-center group">
                            <span class="mr-2 sm:mr-3 flex-shrink-0">
                               <%- getFileIcon(purpose) %>
@@ -232,7 +232,7 @@
                   </tr>
                <% }); %>
             </tbody>
-         </table>
+         </table></div>
 
          <% if (files.length === 0) { %>
             <div class="text-center py-12">

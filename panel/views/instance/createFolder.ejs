@@ -1,7 +1,7 @@
 <%- include('../components/template') %>
 <main id="content">
     <div class="bg-transparent">
-        <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex sm:items-center px-4 sm:px-8 pt-4">
            <div class="sm:flex-auto">
               <h1 class="text-base font-medium leading-6 text-white">Manage Instance</h1>
               <p class="mt-1 tracking-tight text-sm text-neutral-500">View, update and manage an instance on the <%= name %> panel.</p>
@@ -12,7 +12,7 @@
 
     <% let query = req.query.path ? '?path=' + req.query.path : ''; %>
     <div class="flex">
-        <h1 class="text-neutral-200 text-md px-8"><a class="text-neutral-400 hover:text-neutral-300 transition" href="../">/app/data/<%= req.query.path %></a>
+        <h1 class="text-neutral-200 text-md px-4 sm:px-8"><a class="text-neutral-400 hover:text-neutral-300 transition" href="../">/app/data/<%= req.query.path %></a>
             <input
             id="folder"
             type="text"
