@@ -78,24 +78,92 @@ install_panel() {
     echo -e "${GREEN}=======================================${NC}"
 }
 
+install_daemon() {
+    clear
+    echo -e "${BLUE}=======================================${NC}"
+    echo -e "${BLUE}    🐉 INVMC DAEMON AUTO-CONFIGURE    ${NC}"
+    echo -e "${BLUE}=======================================${NC}"
+    
+    echo -e "Please paste your configuration command from the panel"
+    echo -e "(Example: npm run configure -- --panel http://IP:3000 --key UUID)"
+    echo -e "${BLUE}=======================================${NC}"
+    read -p "Command: " cfg_cmd </dev/tty
+    
+    if [[ -z "$cfg_cmd" ]]; then echo -e "${RED}Error: Command cannot be empty.${NC}"; return; fi
+
+    echo -e "\n${BLUE}=>${NC} Checking requirements..."
+    silent apt-get update -y
+    
+    # Check Docker
+    if ! command -v docker &> /dev/null; then
+        echo -e "${BLUE}=>${NC} Installing Docker..."
+        curl -sSL https://get.docker.com/ | silent sh
+        silent systemctl enable --now docker
+    fi
+
+    # Check Node
+    if ! command -v node &> /dev/null; then
+        echo -e "${BLUE}=>${NC} Installing Node.js..."
+        curl -sL https://deb.nodesource.com/setup_22.x | silent sudo bash -
+        silent apt-get install -y nodejs git zip
+    fi
+
+    echo -e "${BLUE}=>${NC} Downloading INVMC Daemon..."
+    rm -rf ~/invmc_daemon_temp
+    silent git clone https://github.com/OddBoyXdxd69/INVMC-Panel ~/invmc_daemon_temp
+    mkdir -p ~/invmc-daemon
+    cp -r ~/invmc_daemon_temp/daemon/* ~/invmc-daemon/
+    rm -rf ~/invmc_daemon_temp
+    
+    cd ~/invmc-daemon || exit
+    
+    echo -e "${BLUE}=>${NC} Installing dependencies..."
+    silent npm install
+    
+    echo -e "${BLUE}=>${NC} Applying configuration..."
+    # Execute the command provided by the user
+    eval "$cfg_cmd"
+    
+    echo -e "${BLUE}=>${NC} Starting Daemon..."
+    if ! command -v pm2 &> /dev/null; then
+        silent npm install pm2 -g
+    fi
+    
+    silent pm2 start index.js --name "invmc-daemon"
+    silent pm2 save; silent pm2 startup
+    
+    echo -e "\n${GREEN}=======================================${NC}"
+    echo -e "  ✅ INVMC Daemon installed & configured!"
+    echo -e "  🚀 Your node is now connecting to the panel."
+    echo -e "  👤 Author: OddBoyXD"
+    echo -e "${GREEN}=======================================${NC}"
+}
+
 update_panel() {
     clear
-    if [ ! -d ~/invmc-panel ]; then echo -e "${RED}ERROR: INVMC Panel is not installed.${NC}"; return; fi
+    if [ ! -d ~/invmc-panel ] && [ ! -d ~/invmc-daemon ]; then 
+        echo -e "${RED}ERROR: INVMC is not installed.${NC}"; return; 
+    fi
     
-    echo -e "${BLUE}Updating INVMC Panel to the latest version...${NC}"
+    echo -e "${BLUE}Checking for updates...${NC}"
     rm -rf ~/invmc_update_temp
     silent git clone https://github.com/OddBoyXdxd69/INVMC-Panel ~/invmc_update_temp
     
-    echo -e "${BLUE}=>${NC} Syncing new code..."
-    cp -r ~/invmc_update_temp/panel/* ~/invmc-panel/
+    if [ -d ~/invmc-panel ]; then
+        echo -e "${BLUE}=>${NC} Updating Panel..."
+        cp -r ~/invmc_update_temp/panel/* ~/invmc-panel/
+        cd ~/invmc-panel && silent npm install
+        silent pm2 restart invmc-panel
+    fi
+
+    if [ -d ~/invmc-daemon ]; then
+        echo -e "${BLUE}=>${NC} Updating Daemon..."
+        cp -r ~/invmc_update_temp/daemon/* ~/invmc-daemon/
+        cd ~/invmc-daemon && silent npm install
+        silent pm2 restart invmc-daemon
+    fi
+    
     rm -rf ~/invmc_update_temp
-    
-    cd ~/invmc-panel || exit
-    echo -e "${BLUE}=>${NC} Checking dependencies..."
-    silent npm install
-    
-    echo -e "${BLUE}=>${NC} Restarting panel..."
-    silent pm2 restart invmc-panel
     echo -e "\n${GREEN}Update Successful!${NC}"
 }
 
@@ -105,18 +173,18 @@ manage_service() {
         echo -e "${BLUE}=======================================${NC}"
         echo -e "       INVMC SERVICE MANAGER 🛠️"
         echo -e "${BLUE}=======================================${NC}"
-        echo "1. Start Panel"
-        echo "2. Stop Panel"
-        echo "3. Restart Panel"
-        echo "4. View Real-time Logs"
+        echo "1. Start All"
+        echo "2. Stop All"
+        echo "3. Restart All"
+        echo "4. View Logs"
         echo "0. Go Back"
         echo -e "${BLUE}=======================================${NC}"
         read -p "Select [0-4]: " s_choice </dev/tty
         case $s_choice in
-            1) silent pm2 start invmc-panel; echo -e "${GREEN}Started!${NC}"; sleep 1 ;;
-            2) silent pm2 stop invmc-panel; echo -e "${RED}Stopped!${NC}"; sleep 1 ;;
-            3) silent pm2 restart invmc-panel; echo -e "${BLUE}Restarted!${NC}"; sleep 1 ;;
-            4) echo "Press Ctrl+C to stop viewing logs..."; sleep 2; pm2 logs invmc-panel ;;
+            1) silent pm2 start all; echo -e "${GREEN}Started!${NC}"; sleep 1 ;;
+            2) silent pm2 stop all; echo -e "${RED}Stopped!${NC}"; sleep 1 ;;
+            3) silent pm2 restart all; echo -e "${BLUE}Restarted!${NC}"; sleep 1 ;;
+            4) pm2 logs ;;
             0) break ;;
         esac
     done
@@ -149,12 +217,15 @@ check_status() {
     echo -e "${BLUE}=======================================${NC}"
     echo -e "         INVMC SYSTEM STATUS 📡"
     echo -e "${BLUE}=======================================${NC}"
-    if pm2 list 2>/dev/null | grep -q "invmc-panel"; then
-        if pm2 list | grep "invmc-panel" | grep -q "online"; then echo -e " 🖥️  Panel: ${GREEN}🟢 ONLINE${NC}"; else echo -e " 🖥️  Panel: ${RED}🔴 OFFLINE${NC}"; fi
-    else echo -e " 🖥️  Panel: ${RED}⚪ NOT INSTALLED${NC}"; fi
     
-    cur_v=$(cd ~/invmc-panel 2>/dev/null && node -e "console.log(require('./package.json').version)" || echo "N/A")
-    echo -e " 📦 Version: $cur_v"
+    if pm2 list 2>/dev/null | grep -q "invmc-panel"; then
+        if pm2 list | grep "invmc-panel" | grep -q "online"; then echo -e " 🖥️  Panel:  ${GREEN}🟢 ONLINE${NC}"; else echo -e " 🖥️  Panel:  ${RED}🔴 OFFLINE${NC}"; fi
+    else echo -e " 🖥️  Panel:  ${RED}⚪ NOT INSTALLED${NC}"; fi
+
+    if pm2 list 2>/dev/null | grep -q "invmc-daemon"; then
+        if pm2 list | grep "invmc-daemon" | grep -q "online"; then echo -e " ⚙️  Daemon: ${GREEN}🟢 ONLINE${NC}"; else echo -e " ⚙️  Daemon: ${RED}🔴 OFFLINE${NC}"; fi
+    else echo -e " ⚙️  Daemon: ${RED}⚪ NOT INSTALLED${NC}"; fi
+    
     echo -e " 👤 Author:  OddBoyXD"
     echo -e "${BLUE}=======================================${NC}"
 }
@@ -177,26 +248,28 @@ while true; do
       ULITMATE MANAGER | OddBoyXD
 EOF
     echo -e "${BLUE}=======================================${NC}"
-    echo -e "  1. ${GREEN}Install${NC} INVMC Panel (One-Click)"
-    echo -e "  2. ${BLUE}Update${NC} Panel (From GitHub)"
-    echo -e "  3. Service Manager (Start/Stop)"
-    echo -e "  4. Edit Configuration (IP/Port)"
-    echo -e "  5. System Status"
-    echo -e "  6. ${RED}Uninstall${NC} Panel"
+    echo -e "  1. ${GREEN}Install${NC} INVMC Panel"
+    echo -e "  2. ${BLUE}Configure${NC} INVMC Daemon (Paste command)"
+    echo -e "  3. Update Panel & Daemon"
+    echo -e "  4. Service Manager (Start/Stop)"
+    echo -e "  5. Edit Panel Configuration"
+    echo -e "  6. System Status"
+    echo -e "  7. ${RED}Uninstall${NC} Everything"
     echo -e "  0. Exit"
     echo -e "${BLUE}=======================================${NC}"
-    read -p "Select [0-6]: " choice </dev/tty
+    read -p "Select [0-7]: " choice </dev/tty
 
     case $choice in
         1) install_panel; pause_for_enter ;;
-        2) update_panel; pause_for_enter ;;
-        3) manage_service ;;
-        4) edit_config; pause_for_enter ;;
-        5) check_status; pause_for_enter ;;
-        6) 
+        2) install_daemon; pause_for_enter ;;
+        3) update_panel; pause_for_enter ;;
+        4) manage_service ;;
+        5) edit_config; pause_for_enter ;;
+        6) check_status; pause_for_enter ;;
+        7) 
             read -p "Are you sure? This deletes EVERYTHING. (y/n): " confirm </dev/tty
             if [[ "$confirm" == "y" ]]; then
-                silent pm2 stop invmc-panel; silent pm2 delete invmc-panel; rm -rf ~/invmc-panel
+                silent pm2 stop all; silent pm2 delete all; rm -rf ~/invmc-panel ~/invmc-daemon
                 echo "Uninstalled."; sleep 2
             fi ;;
         0) exit 0 ;;
