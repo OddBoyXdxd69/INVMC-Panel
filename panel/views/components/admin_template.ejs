@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | <%= name %></title>
+    <link rel="icon" href="https://i.ibb.co/mrHNJD2y/WB-2.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        :root { --sidebar-bg: #0f172a; --sidebar-hover: rgba(255, 255, 255, 0.05); --sidebar-active: rgba(239, 68, 68, 0.15); --accent-color: #ef4444; --bg-dark: #020617; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: rgba(255, 255, 255, 0.8); margin: 0; overflow-x: hidden; }
+        .sidebar { width: 260px; background: var(--sidebar-bg); border-right: 1px solid rgba(255, 255, 255, 0.05); height: 100vh; position: fixed; left: 0; top: 0; z-index: 50; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; }
+        .sidebar-link { display: flex; align-items: center; padding: 0.65rem 1rem; margin: 0.15rem 0.75rem; color: rgba(255, 255, 255, 0.5); border-radius: 0.5rem; transition: all 0.2s; text-decoration: none; font-size: 0.875rem; }
+        .sidebar-link:hover { background: var(--sidebar-hover); color: white; transform: translateX(4px); }
+        .sidebar-link.active { background: var(--sidebar-active); color: var(--accent-color); font-weight: 500; }
+        .main-content { margin-left: 260px; min-height: 100vh; transition: margin-left 0.3s ease; padding: 1rem; position: relative; }
+        @media (max-width: 1024px) { .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); } .main-content { margin-left: 0; padding-top: 4rem; } }
+        .hamburger { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 60; background: var(--sidebar-bg); border: 1px solid rgba(255, 255, 255, 0.1); padding: 0.5rem; border-radius: 0.5rem; cursor: pointer; color: white; }
+        @media (max-width: 1024px) { .hamburger { display: block; } }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+    </style>
+</head>
+<body x-data="{ sidebarOpen: false }">
+    <button class="hamburger shadow-lg" @click="sidebarOpen = !sidebarOpen">
+        <i class="fas fa-bars text-xl"></i>
+    </button>
+    <div x-show="sidebarOpen" @click="sidebarOpen = false" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden" x-transition></div>
+    <aside class="sidebar" :class="{ 'open': sidebarOpen }">
+        <div class="p-6 flex items-center gap-3">
+            <img src="https://i.ibb.co/mrHNJD2y/WB-2.png" class="w-10 h-10 rounded-lg shadow-[0_0_10px_rgba(239,68,68,0.3)]" alt="Logo">
+            <div>
+                <h1 class="font-bold text-white tracking-tight leading-none text-lg">INVMC</h1>
+                <p class="text-[9px] text-red-400 font-mono uppercase tracking-widest mt-1">Admin HQ</p>
+            </div>
+        </div>
+        <nav class="mt-2 flex-1 overflow-y-auto">
+            <div class="px-6 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Management</div>
+            <a href="/admin/overview" class="sidebar-link <%= req.path === '/admin/overview' ? 'active' : '' %>"><i class="fas fa-chart-line w-5 mr-3 text-center"></i> Overview</a>
+            <a href="/admin/settings" class="sidebar-link <%= req.path.includes('/settings') ? 'active' : '' %>"><i class="fas fa-cog w-5 mr-3 text-center"></i> Settings</a>
+            <a href="/admin/nodes" class="sidebar-link <%= req.path.includes('/nodes') ? 'active' : '' %>"><i class="fas fa-network-wired w-5 mr-3 text-center"></i> Nodes</a>
+            <a href="/admin/instances" class="sidebar-link <%= req.path === '/admin/instances' ? 'active' : '' %>"><i class="fas fa-server w-5 mr-3 text-center"></i> Servers</a>
+            <a href="/admin/images" class="sidebar-link <%= req.path.includes('/images') ? 'active' : '' %>"><i class="fas fa-compact-disc w-5 mr-3 text-center"></i> Images</a>
+            <a href="/admin/users" class="sidebar-link <%= req.path.includes('/users') ? 'active' : '' %>"><i class="fas fa-users w-5 mr-3 text-center"></i> Users</a>
+            
+            <div class="px-6 py-2 mt-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Security</div>
+            <a href="/admin/analytics" class="sidebar-link <%= req.path.includes('/analytics') ? 'active' : '' %>"><i class="fas fa-microchip w-5 mr-3 text-center"></i> Analytics</a>
+            <a href="/admin/auditlogs" class="sidebar-link <%= req.path.includes('/auditlogs') ? 'active' : '' %>"><i class="fas fa-list-ul w-5 mr-3 text-center"></i> Audit Logs</a>
+            <a href="/admin/apikeys" class="sidebar-link <%= req.path.includes('/apikeys') ? 'active' : '' %>"><i class="fas fa-key w-5 mr-3 text-center"></i> API Keys</a>
+            
+            <div class="px-6 py-2 mt-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Addons</div>
+            <a href="/admin/plugins" class="sidebar-link <%= req.path === '/admin/plugins' ? 'active' : '' %>"><i class="fas fa-puzzle-piece w-5 mr-3 text-center"></i> Plugins</a>
+            
+            <% if (typeof pluginsidebar !== "undefined") { %>
+                <% Object.keys(pluginsidebar).forEach(plugin => { %>
+                <a href="<%= pluginsidebar[plugin] %>" class="sidebar-link <%= req.path === pluginsidebar[plugin] ? 'active' : '' %>">
+                    <i class="fas fa-plug w-5 mr-3 text-center"></i>
+                    <span><%= plugin %></span>
+                </a>
+                <% }) %>
+            <% } %>
+        </nav>
+        <div class="p-4 border-t border-white/5">
+            <a href="/instances" class="sidebar-link text-gray-400 hover:text-white"><i class="fas fa-arrow-left w-5 mr-3 text-center"></i> Back to User</a>
+        </div>
+    </aside>
+    <main class="main-content">

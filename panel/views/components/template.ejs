@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= name %></title>
+    <link rel="icon" href="https://i.ibb.co/mrHNJD2y/WB-2.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        :root { --sidebar-bg: #0f172a; --sidebar-hover: rgba(255, 255, 255, 0.05); --sidebar-active: rgba(99, 102, 241, 0.15); --accent-color: #6366f1; --bg-dark: #020617; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: rgba(255, 255, 255, 0.8); margin: 0; overflow-x: hidden; }
+        .sidebar { width: 260px; background: var(--sidebar-bg); border-right: 1px solid rgba(255, 255, 255, 0.05); height: 100vh; position: fixed; left: 0; top: 0; z-index: 50; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; }
+        .sidebar-link { display: flex; align-items: center; padding: 0.75rem 1rem; margin: 0.1rem 0.75rem; color: rgba(255, 255, 255, 0.5); border-radius: 0.5rem; transition: all 0.2s; text-decoration: none; font-size: 0.875rem; }
+        .sidebar-link:hover { background: var(--sidebar-hover); color: white; transform: translateX(4px); }
+        .sidebar-link.active { background: var(--sidebar-active); color: var(--accent-color); font-weight: 500; }
+        .sidebar-link.active i { color: var(--accent-color); }
+        .main-content { margin-left: 260px; min-height: 100vh; transition: margin-left 0.3s ease; padding: 1rem; position: relative; }
+        @media (max-width: 1024px) { .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); } .main-content { margin-left: 0; padding-top: 4rem; } }
+        .hamburger { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 60; background: var(--sidebar-bg); border: 1px solid rgba(255, 255, 255, 0.1); padding: 0.5rem; border-radius: 0.5rem; cursor: pointer; color: white; }
+        @media (max-width: 1024px) { .hamburger { display: block; } }
+        .sidebar-logo { filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.4)); }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+    </style>
+</head>
+<body x-data="{ sidebarOpen: false }">
+    <button class="hamburger shadow-lg" @click="sidebarOpen = !sidebarOpen">
+        <i class="fas fa-bars text-xl"></i>
+    </button>
+    <div x-show="sidebarOpen" @click="sidebarOpen = false" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden" x-transition></div>
+    <aside class="sidebar" :class="{ 'open': sidebarOpen }">
+        <div class="p-6 flex items-center gap-3">
+            <img src="https://i.ibb.co/mrHNJD2y/WB-2.png" class="w-10 h-10 sidebar-logo rounded-lg" alt="Logo">
+            <div>
+                <h1 class="font-bold text-white tracking-tight leading-none text-lg">INVMC</h1>
+                <p class="text-[9px] text-indigo-400 font-mono uppercase tracking-widest mt-1">Premium Hosting</p>
+            </div>
+        </div>
+        <nav class="mt-2 flex-1 overflow-y-auto">
+            <div class="px-6 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-widest">General</div>
+            <a href="/instances" class="sidebar-link <%= req.path === '/instances' ? 'active' : '' %>"><i class="fas fa-server w-5 text-center mr-3"></i><span>Dashboard</span></a>
+            <a href="/account" class="sidebar-link <%= req.path === '/account' ? 'active' : '' %>"><i class="fas fa-user-circle w-5 text-center mr-3"></i><span>Account</span></a>
+            
+            <% if (req.params.id) { %>
+            <div class="px-6 py-2 mt-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Instance: <%= req.params.id.split('-')[0] %></div>
+            <a href="/instance/<%= req.params.id %>" class="sidebar-link <%= req.path === '/instance/'+req.params.id ? 'active' : '' %>"><i class="fas fa-terminal w-5 text-center mr-3"></i><span>Console</span></a>
+            <a href="/instance/<%= req.params.id %>/files" class="sidebar-link <%= req.path.includes('/files') ? 'active' : '' %>"><i class="fas fa-folder w-5 text-center mr-3"></i><span>File Manager</span></a>
+            <a href="/instance/<%= req.params.id %>/db" class="sidebar-link <%= req.path.includes('/db') ? 'active' : '' %>"><i class="fas fa-database w-5 text-center mr-3"></i><span>Databases</span></a>
+            <a href="/instance/<%= req.params.id %>/archives" class="sidebar-link <%= req.path.includes('/archives') ? 'active' : '' %>"><i class="fas fa-archive w-5 text-center mr-3"></i><span>Backups</span></a>
+            <a href="/instance/<%= req.params.id %>/network" class="sidebar-link <%= req.path.includes('/network') ? 'active' : '' %>"><i class="fas fa-network-wired w-5 text-center mr-3"></i><span>Network</span></a>
+            <a href="/instance/<%= req.params.id %>/users" class="sidebar-link <%= req.path.includes('/users') ? 'active' : '' %>"><i class="fas fa-users w-5 text-center mr-3"></i><span>Users</span></a>
+            <a href="/instance/<%= req.params.id %>/startup" class="sidebar-link <%= req.path.includes('/startup') ? 'active' : '' %>"><i class="fas fa-play w-5 text-center mr-3"></i><span>Startup</span></a>
+            <a href="/instance/<%= req.params.id %>/edit" class="sidebar-link <%= req.path.includes("/edit") ? "active" : "" %>"><i class="fas fa-cog w-5 text-center mr-3"></i><span>Settings</span></a>
+            <% } %>
+
+            <% if (req.user.admin) { %>
+            <div class="px-6 py-2 mt-4 text-[10px] font-bold text-red-500/60 uppercase tracking-widest">System</div>
+            <a href="/admin/overview" class="sidebar-link"><i class="fas fa-shield-halved w-5 text-center mr-3"></i><span>Admin HQ</span></a>
+            <% } %>
+        </nav>
+        <div class="p-4 border-t border-white/5">
+            <a href="/login" class="sidebar-link text-red-400/60 hover:text-red-400"><i class="fas fa-sign-out-alt w-5 text-center mr-3"></i><span>Sign Out</span></a>
+        </div>
+    </aside>
+    <main class="main-content">
