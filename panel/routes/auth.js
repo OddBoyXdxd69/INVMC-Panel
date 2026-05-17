@@ -225,6 +225,13 @@ router.post(
   async (req, res, next) => {
     try {
       if (req.user) {
+        // Handle "Remember Me"
+        if (req.body["remember-me"]) {
+          req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
+        } else {
+          req.session.cookie.expires = false; // Session cookie
+        }
+
         const users = await db.get("users");
         const user = users.find((u) => u.username === req.user.username);
 
