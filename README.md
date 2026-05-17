@@ -16,7 +16,7 @@
 
 ---
 
-## %u2728 Features
+## ✨ Features
 
 - **Modern Dark UI**: A sleek, midnight-blue aesthetic designed for professional hosting providers.
 - **Unified Management**: Manage both your Panel (Web) and Nodes (Daemon) from a single repository.
@@ -25,7 +25,7 @@
 - **Fast Deployment**: Spin up game instances in seconds using Docker container technology.
 - **Advanced Security**: Integrated container isolation and secure user authentication.
 
-## %u1F680 Quick Installation
+## 🚀 Quick Installation
 
 You can install the complete INVMC suite (Panel + Daemon) on any Ubuntu/Debian VPS with a single command:
 
@@ -33,20 +33,20 @@ You can install the complete INVMC suite (Panel + Daemon) on any Ubuntu/Debian V
 bash <(curl -sL https://raw.githubusercontent.com/OddBoyXdxd69/INVMC-Panel/main/invmc.sh)
 ```
 
-## %u1F4C2 Project Structure
+## 📂 Project Structure
 
 - `/panel`: The main web interface code (Node.js/EJS).
 - `/daemon`: The node management service (Docker/Node.js).
 - `invmc.sh`: The easy-to-use installation and management script.
 
-## %u1F6E0%uFE0F Requirements
+## 🛠️ Requirements
 
 - **OS**: Ubuntu 22.04 or 24.04 (Recommended)
 - **Memory**: 2GB+ (Depending on game servers)
 - **Docker**: Automatically installed by the script.
 - **Node.js**: v22+ (Automatically installed).
 
-## %u1F91D Community & Support
+## 🤝 Community & Support
 
 Join our Discord for updates, bug reports, and community support.
 
@@ -56,5 +56,5 @@ Join our Discord for updates, bug reports, and community support.
 ---
 
 <p align="center">
-  %copy 2026 INVMC | Authored by <b>OddBoyXD</b> | All Rights Reserved.
+  © 2026 INVMC | Authored by <b>OddBoyXD</b> | All Rights Reserved.
 </p>
