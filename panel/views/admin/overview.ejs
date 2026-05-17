@@ -204,11 +204,14 @@
             } else {
                 versionStatusSpan.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-900 text-amber-200 gap-1"><svg class="-ml-0.5 mr-1 h-2 w-2 text-amber-400" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>New version ${latestVersion} available! <a href="${data.html_url}" target="_blank" class="underline ml-1">Update here</a></span>`;
             }
+        } else if (response.status === 404) {
+            // No releases found on GitHub yet, assume current is latest
+            versionStatusSpan.innerHTML = '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-900 text-green-200"><svg class="-ml-0.5 mr-1 h-2 w-2 text-green-400" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>Running Stable</span>';
         } else {
-            versionStatusSpan.innerHTML = '<span class="text-gray-500">Unable to check for updates</span>';
+            versionStatusSpan.innerHTML = '<span class="text-gray-500">Checking...</span>';
         }
     } catch (e) {
-        versionStatusSpan.innerHTML = '<span class="text-gray-500">Error checking for updates</span>';
+        versionStatusSpan.innerHTML = '<span class="text-gray-500">Local Environment</span>';
     }
 
     const welcomePopup = document.getElementById('welcomePopup');
