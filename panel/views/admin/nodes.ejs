@@ -622,7 +622,26 @@
     const doneBtn = document.getElementById('doneBtn');
 
     copyBtn.addEventListener('click', function() {
-      navigator.clipboard.writeText(command).then(() => {
+      // Use fallback for non-secure contexts
+      const textArea = document.createElement("textarea");
+      textArea.value = command;
+      document.body.appendChild(textArea);
+      textArea.select();
+      
+      let success = false;
+      try {
+        success = document.execCommand('copy');
+      } catch (err) {
+        success = false;
+      }
+      
+      document.body.removeChild(textArea);
+
+      if (success || (navigator.clipboard && navigator.clipboard.writeText)) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(command);
+        }
+        
         copyBtn.innerHTML = `
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256" class="text-emerald-400">
             <path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"></path>
@@ -636,10 +655,9 @@
           `;
         }, 2000);
         showToast('Command copied to clipboard!');
-      }).catch(err => {
-        console.error('Failed to copy command:', err);
+      } else {
         showToast('Failed to copy command', 'error');
-      });
+      }
     });
 
     doneBtn.addEventListener('click', closePopup);
