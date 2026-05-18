@@ -44,7 +44,7 @@ install_panel() {
     git clone https://github.com/OddBoyXdxd69/INVMC-Panel /tmp/invmc_clone
     
     mkdir -p /root/invmc-panel
-    cp -av /tmp/invmc_clone/panel/. /root/invmc-panel/
+    cp -anv /tmp/invmc_clone/panel/. /root/invmc-panel/
     rm -rf /tmp/invmc_clone
     
     cd /root/invmc-panel || exit
@@ -100,7 +100,7 @@ install_daemon() {
     git clone https://github.com/OddBoyXdxd69/INVMC-Panel /tmp/invmc_daemon_clone
     
     mkdir -p /root/invmc-daemon
-    cp -av /tmp/invmc_daemon_clone/daemon/. /root/invmc-daemon/
+    cp -anv /tmp/invmc_daemon_clone/daemon/. /root/invmc-daemon/
     rm -rf /tmp/invmc_daemon_clone
     
     cd /root/invmc-daemon || exit
@@ -125,12 +125,12 @@ update_all() {
     git clone https://github.com/OddBoyXdxd69/INVMC-Panel /tmp/invmc_update
     
     if [ -d /root/invmc-panel ]; then
-        cp -av /tmp/invmc_update/panel/. /root/invmc-panel/
+        cp -anv /tmp/invmc_update/panel/. /root/invmc-panel/
         cd /root/invmc-panel && npm install --no-audit --no-fund && pm2 restart invmc-panel
     fi
 
     if [ -d /root/invmc-daemon ]; then
-        cp -av /tmp/invmc_update/daemon/. /root/invmc-daemon/
+        cp -anv /tmp/invmc_update/daemon/. /root/invmc-daemon/
         cd /root/invmc-daemon && npm install --no-audit --no-fund && pm2 restart invmc-daemon
     fi
     
