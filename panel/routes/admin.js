@@ -934,6 +934,7 @@ router.post(
 router.post("/admin/settings/change/name", isAdmin, async (req, res) => {
   const { name } = req.body;
   try {
+    await db.set("name", name);
     let settings = (await db.get("settings")) || {};
     settings.name = name;
     await db.set("settings", settings);
