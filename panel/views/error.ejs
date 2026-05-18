@@ -1,0 +1,29 @@
+<%- include('components/template') %>
+
+<main class="flex items-center justify-center min-h-[70vh]">
+    <div class="glass-card max-w-lg w-full p-10 text-center animate-fade-in">
+        <div class="w-20 h-20 bg-rose-600/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-rose-500/20">
+            <i class="fas fa-exclamation-triangle text-3xl text-rose-500"></i>
+        </div>
+        
+        <h1 class="text-3xl font-extrabold text-white tracking-tight mb-2">Something went wrong</h1>
+        <p class="text-gray-400 text-sm mb-8 leading-relaxed">
+            <%= typeof error !== 'undefined' ? error : 'An unexpected error occurred while processing your request.' %>
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <a href="javascript:history.back()" class="bg-gray-800 hover:bg-gray-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition">
+                <i class="fas fa-arrow-left mr-2"></i> Go Back
+            </a>
+            <a href="/instances" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition shadow-lg shadow-indigo-600/20">
+                <i class="fas fa-home mr-2"></i> Dashboard
+            </a>
+        </div>
+        
+        <p class="mt-10 text-[10px] text-gray-600 uppercase font-mono tracking-widest">
+            INVMC Error Handler
+        </p>
+    </div>
+</main>
+
+<%- include('components/footer') %>
