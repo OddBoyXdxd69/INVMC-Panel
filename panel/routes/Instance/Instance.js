@@ -39,13 +39,24 @@ async function checkState(instanceId) {
         }
 
         const getStateUrl = `http://${instance.Node.address}:${instance.Node.port}/instances/${instance.Id}/states/get`;
-        const getStateResponse = await axios.get(getStateUrl, {
-            auth: {
-                username: "INVMC",
-                password: instance.Node.apiKey,
-            },
-            timeout: 5000,
-        });
+        let getStateResponse;
+        try {
+            getStateResponse = await axios.get(getStateUrl, {
+                auth: {
+                    username: "INVMC",
+                    password: instance.Node.apiKey,
+                },
+                timeout: 5000,
+            });
+        } catch (axiosError) {
+            if (axiosError.response && axiosError.response.status === 404) {
+                // If container not found on daemon, set state to offline/error instead of crashing
+                instance.State = "OFFLINE";
+                await db.set(`${instanceId}_instance`, instance);
+                return;
+            }
+            throw axiosError;
+        }
 
         if (!getStateResponse.data || !getStateResponse.data.state) {
             throw new Error("Invalid state response from server");
