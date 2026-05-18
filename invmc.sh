@@ -40,7 +40,7 @@ install_panel() {
     rm -rf ~/invmc_temp
     silent git clone https://github.com/OddBoyXdxd69/INVMC-Panel ~/invmc_temp
     mkdir -p ~/invmc-panel
-    cp -r ~/invmc_temp/panel/* ~/invmc-panel/
+    cp -r ~/invmc_temp/panel/. ~/invmc-panel/
     rm -rf ~/invmc_temp
     cd ~/invmc-panel || exit
     
@@ -88,7 +88,7 @@ install_daemon() {
     rm -rf ~/invmc_daemon_temp
     silent git clone https://github.com/OddBoyXdxd69/INVMC-Panel ~/invmc_daemon_temp
     mkdir -p ~/invmc-daemon
-    cp -r ~/invmc_daemon_temp/daemon/* ~/invmc-daemon/
+    cp -r ~/invmc_daemon_temp/daemon/. ~/invmc-daemon/
     rm -rf ~/invmc_daemon_temp
     
     cd ~/invmc-daemon || exit
