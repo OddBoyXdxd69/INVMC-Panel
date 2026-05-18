@@ -35,6 +35,7 @@ install_panel() {
     silent apt-get update -y
     
     if ! command -v node &> /dev/null; then
+        echo -e "${BLUE}=>${NC} Installing Node.js..."
         curl -sL https://deb.nodesource.com/setup_22.x | silent sudo bash -
         silent apt-get install -y nodejs git zip
     fi
@@ -44,7 +45,7 @@ install_panel() {
     git clone https://github.com/OddBoyXdxd69/INVMC-Panel /tmp/invmc_clone
     
     mkdir -p /root/invmc-panel
-    cp -anv /tmp/invmc_clone/panel/. /root/invmc-panel/
+    cp -av /tmp/invmc_clone/panel/. /root/invmc-panel/
     rm -rf /tmp/invmc_clone
     
     cd /root/invmc-panel || exit
@@ -86,11 +87,13 @@ install_daemon() {
     silent apt-get update -y
     
     if ! command -v docker &> /dev/null; then
+        echo -e "${BLUE}=>${NC} Installing Docker..."
         curl -sSL https://get.docker.com/ | silent sh
         silent systemctl enable --now docker
     fi
 
     if ! command -v node &> /dev/null; then
+        echo -e "${BLUE}=>${NC} Installing Node.js..."
         curl -sL https://deb.nodesource.com/setup_22.x | silent sudo bash -
         silent apt-get install -y nodejs git zip
     fi
@@ -100,7 +103,9 @@ install_daemon() {
     git clone https://github.com/OddBoyXdxd69/INVMC-Panel /tmp/invmc_daemon_clone
     
     mkdir -p /root/invmc-daemon
-    cp -anv /tmp/invmc_daemon_clone/daemon/. /root/invmc-daemon/
+    # Using -a instead of -anv to be more reliable while preserving existing config if desired
+    # But for a "configure" command, we usually want the fresh code.
+    cp -av /tmp/invmc_daemon_clone/daemon/. /root/invmc-daemon/
     rm -rf /tmp/invmc_daemon_clone
     
     cd /root/invmc-daemon || exit
@@ -109,6 +114,7 @@ install_daemon() {
     npm install --no-audit --no-fund
     
     echo -e "${BLUE}=>${NC} Applying configuration..."
+    # Execute the command
     eval "$cfg_cmd"
     
     if ! command -v pm2 &> /dev/null; then silent npm install pm2 -g; fi
@@ -125,12 +131,12 @@ update_all() {
     git clone https://github.com/OddBoyXdxd69/INVMC-Panel /tmp/invmc_update
     
     if [ -d /root/invmc-panel ]; then
-        cp -anv /tmp/invmc_update/panel/. /root/invmc-panel/
+        cp -av /tmp/invmc_update/panel/. /root/invmc-panel/
         cd /root/invmc-panel && npm install --no-audit --no-fund && pm2 restart invmc-panel
     fi
 
     if [ -d /root/invmc-daemon ]; then
-        cp -anv /tmp/invmc_update/daemon/. /root/invmc-daemon/
+        cp -av /tmp/invmc_update/daemon/. /root/invmc-daemon/
         cd /root/invmc-daemon && npm install --no-audit --no-fund && pm2 restart invmc-daemon
     fi
     
@@ -138,12 +144,20 @@ update_all() {
     echo -e "\n${GREEN}Update Successful!${NC}"
 }
 
+# ==========================================
+# 2. MAIN LOGIC (ARGUMENTS + MENU)
+# ==========================================
+
 # Direct Command Handling
 if [[ "$1" == "configure" ]]; then
     shift
-    install_daemon "npm run configure -- $@"
+    # Construct the full npm command from ALL remaining arguments
+    # Using "$*" ensures it's passed as a single string to install_daemon
+    install_daemon "npm run configure -- $*"
     exit 0
 fi
+
+pause_for_enter() { echo ""; read -p "Press ENTER to return to menu..." </dev/tty; }
 
 while true; do
     clear
