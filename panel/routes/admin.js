@@ -69,7 +69,7 @@ async function checkNodeStatus(node) {
       method: "get",
       url: "http://" + node.address + ":" + node.port + "/",
       auth: {
-        username: "Skyport",
+        username: "INVMC",
         password: node.apiKey,
       },
       headers: {
@@ -435,7 +435,7 @@ router.get("/admin/node/:id/stats", isAdmin, async (req, res) => {
     try {
       const response = await axios.get(`http://${node.address}:${node.port}/stats`, {
         headers: {
-          Authorization: `Basic ${Buffer.from(`Skyport:${node.apiKey}`).toString('base64')}`
+          Authorization: `Basic ${Buffer.from(`INVMC:${node.apiKey}`).toString('base64')}`
         },
         timeout: 5000 // 5 second timeout
       });
@@ -510,7 +510,7 @@ router.post("/admin/nodes/radar/check", isAdmin, async (req, res) => {
               `http://${node.address}:${node.port}/check/all`,
               {
                 auth: {
-                  username: "Skyport",
+                  username: "INVMC",
                   password: node.apiKey,
                 },
               },
@@ -619,7 +619,7 @@ router.post("/nodes/delete", async (req, res) => {
 
         try {
           await axios.get(
-            `http://Skyport:${node.apiKey}@${node.address}:${node.port}/instances/purge/all`,
+            `http://INVMC:${node.apiKey}@${node.address}:${node.port}/instances/purge/all`,
           );
         } catch (apiError) {
           console.error("Error calling purge API:", apiError);
@@ -1173,7 +1173,7 @@ async function processInstances() {
         const getStateUrl = `http://${instance.Node.address}:${instance.Node.port}/instances/${instance.Id}/states/get`;
         const getStateResponse = await axios.get(getStateUrl, {
           auth: {
-            username: "Skyport",
+            username: "INVMC",
             password: instance.Node.apiKey,
           },
         });
@@ -1184,7 +1184,7 @@ async function processInstances() {
         const setStateUrl = `http://${instance.Node.address}:${instance.Node.port}/instances/${instance.Id}/states/set/${newState}`;
         await axios.get(setStateUrl, {
           auth: {
-            username: "Skyport",
+            username: "INVMC",
             password: instance.Node.apiKey,
           },
         });
@@ -1491,7 +1491,7 @@ const workflowsFilePath = path.join(__dirname, "../storage/workflows.json");
 async function deleteInstance(instance) {
   try {
     await axios.get(
-      `http://Skyport:${instance.Node.apiKey}@${instance.Node.address}:${instance.Node.port}/instances/${instance.ContainerId}/delete`,
+      `http://INVMC:${instance.Node.apiKey}@${instance.Node.address}:${instance.Node.port}/instances/${instance.ContainerId}/delete`,
     );
 
     let userInstances = (await db.get(instance.User + "_instances")) || [];

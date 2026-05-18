@@ -52,7 +52,7 @@ router.post("/instance/:id/files/upload", upload.array('files'), async (req, res
         const response = await axios.post(apiUrl, formData, {
             headers: {
                 ...formData.getHeaders(),
-                'Authorization': `Basic ${Buffer.from('Skyport:' + instance.Node.apiKey).toString('base64')}`,
+                'Authorization': `Basic ${Buffer.from('INVMC:' + instance.Node.apiKey).toString('base64')}`,
             }
         });
         res.json({ message: 'Files uploaded successfully', details: response.data });

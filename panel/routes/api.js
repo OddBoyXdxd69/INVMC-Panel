@@ -632,7 +632,7 @@ async function deleteInstance(instance) {
             `http://${instance.Node.address}:${instance.Node.port}/instances/${instance.ContainerId}`,
             {
                 auth: {
-                    username: 'Skyport',
+                    username: 'INVMC',
                     password: instance.Node.apiKey
                 }
             }
@@ -731,7 +731,7 @@ async function prepareRequestData(image, memory, cpu, ports, name, node, Id, var
         method: 'post',
         url: `http://${node.address}:${node.port}/instances/create`,
         auth: {
-            username: 'Skyport',
+            username: 'INVMC',
             password: node.apiKey,
         },
         headers: {
@@ -787,7 +787,7 @@ async function checkNodeStatus(node) {
             method: 'get',
             url: `http://${node.address}:${node.port}/`,
             auth: {
-                username: 'Skyport',
+                username: 'INVMC',
                 password: node.apiKey
             },
             headers: {

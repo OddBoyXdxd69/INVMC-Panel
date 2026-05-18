@@ -76,7 +76,7 @@ async function prepareRequestData(image, memory, cpu, disk, ports, name, node, i
         method: 'post',
         url: `http://${node.address}:${node.port}/instances/redeploy/${containerId}`,
         auth: {
-            username: 'Skyport',
+            username: 'INVMC',
             password: node.apiKey
         },
         headers: { 

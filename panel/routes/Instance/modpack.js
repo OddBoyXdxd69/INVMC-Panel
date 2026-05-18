@@ -257,7 +257,7 @@ router.get('/instance/:id/modpacks/download', async (req, res) => {
             method: 'post',
             url: `http://${instance.Node.address}:${instance.Node.port}/fs/${instance.VolumeId}/files/mods/${encodeURIComponent(downloadUrl)}/${fileName}`,
             auth: {
-                username: 'Skyport',
+                username: 'INVMC',
                 password: instance.Node.apiKey
             },
             headers: { 'Content-Type': 'application/json' },

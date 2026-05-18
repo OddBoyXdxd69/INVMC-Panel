@@ -83,7 +83,7 @@ router.get("/instance/:id/plugins", async (req, res) => {
   let instance = await db.get(id + "_instance");
   if (!instance) return res.redirect("../instances");
 
-  const java = "quay.io/skyport/java:21";
+  const java = "quay.io/invmc/java:21";
 
   if (!instance.Image === java) {
     return res.redirect("../../instance/" + id);
@@ -163,7 +163,7 @@ router.get("/instance/:id/plugins/download", async (req, res) => {
       method: "post",
       url: `http://${instance.Node.address}:${instance.Node.port}/fs/${instance.VolumeId}/files/plugin/${encodedDownloadUrl}/${plugin_name}`,
       auth: {
-        username: "Skyport",
+        username: "INVMC",
         password: instance.Node.apiKey,
       },
       headers: {

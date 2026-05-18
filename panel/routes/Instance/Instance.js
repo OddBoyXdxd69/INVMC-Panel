@@ -41,7 +41,7 @@ async function checkState(instanceId) {
         const getStateUrl = `http://${instance.Node.address}:${instance.Node.port}/instances/${instance.Id}/states/get`;
         const getStateResponse = await axios.get(getStateUrl, {
             auth: {
-                username: "Skyport",
+                username: "INVMC",
                 password: instance.Node.apiKey,
             },
             timeout: 5000,
@@ -56,7 +56,7 @@ async function checkState(instanceId) {
 
         await axios.get(setStateUrl, {
             auth: {
-                username: "Skyport",
+                username: "INVMC",
                 password: instance.Node.apiKey,
             },
             timeout: 5000,

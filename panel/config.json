@@ -6,8 +6,8 @@
   "mode": "production",
   "version": "4.0",
   "note": "you can also use Mysql if you put mysql://user:pass@localhost:3306/dbname into databaseURL!",
-  "databaseURL": "sqlite://skyport.db",
-  "databaseTable": "skyport",
+  "databaseURL": "sqlite://invmc.db",
+  "databaseTable": "invmc",
   "ogTitle": "INVMC Panel",
   "ogDescription": "This is an instance of the INVMC Panel - learn more at github.com/OddBoyXD"
 }

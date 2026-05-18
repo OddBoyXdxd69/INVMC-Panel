@@ -52,7 +52,7 @@ router.get("/instance/:id/files/unzip/:file", async (req, res) => {
         {},
         {
           auth: {
-            username: "Skyport",
+            username: "INVMC",
             password: instance.Node.apiKey,
           },
           timeout: 10000 // 10 seconds timeout

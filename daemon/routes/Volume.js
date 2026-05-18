@@ -303,17 +303,19 @@ router.get("/:id/files", async (req, res) => {
   }
 });
 
+const { execFile } = require('child_process');
+
 function unzipFile(file, fullPath, id) {
   const VolumePath = path.join(__dirname, "../volumes", id);
   const fullFilePATH = path.join(VolumePath, file);
 
   return new Promise((resolve, reject) => {
-    exec(`unzip -o ${fullFilePATH} -d ${fullPath}`, (error, stdout, stderr) => {
+    execFile('unzip', ['-o', fullFilePATH, '-d', fullPath], (error, stdout, stderr) => {
       if (error) {
-        console.error(`Error during unzip: ${stderr || error.message}`); // Log the actual stderr or error message
-        reject(new Error(`Error during unzip: ${stderr || error.message}`)); // Pass the error to the catch block
+        console.error(`Error during unzip: ${stderr || error.message}`);
+        reject(new Error(`Error during unzip: ${stderr || error.message}`));
       } else {
-        resolve(`Successfully unzipped ${file}`); // Properly resolve the promise
+        resolve(`Successfully unzipped ${file}`);
       }
     });
   });

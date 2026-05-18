@@ -23,7 +23,7 @@ async function processInstances() {
         const getStateUrl = `http://${instance.Node.address}:${instance.Node.port}/instances/${instance.Id}/states/get`;
         const getStateResponse = await axios.get(getStateUrl, {
           auth: {
-            username: "Skyport",
+            username: "INVMC",
             password: instance.Node.apiKey,
           },
         });
@@ -35,7 +35,7 @@ async function processInstances() {
         const setStateUrl = `http://${instance.Node.address}:${instance.Node.port}/instances/${instance.Id}/states/set/${newState}`;
         await axios.get(setStateUrl, {}, {
           auth: {
-            username: "Skyport",
+            username: "INVMC",
             password: instance.Node.apiKey,
           },
         });
@@ -147,7 +147,7 @@ async function prepareRequestData(image, memory, cpu, ports, name, node, Id, var
     method: 'post',
     url: `http://${node.address}:${node.port}/instances/create`,
     auth: {
-      username: 'Skyport',
+      username: 'INVMC',
       password: node.apiKey,
     },
     headers: {

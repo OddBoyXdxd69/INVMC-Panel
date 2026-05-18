@@ -195,12 +195,12 @@ function prepareEditRequestData(instance, Image, Memory, Cpu) {
         method: "put",
         url: `${nodeUrl}/instances/edit/${instance.ContainerId}`,
         auth: {
-            username: "Skyport",
+            username: "INVMC",
             password: instance.Node.apiKey,
         },
         headers: {
             "Content-Type": "application/json",
-            "X-Requested-By": "Skyport-API",
+            "X-Requested-By": "INVMC-API",
         },
         data: {
             Image: Image !== undefined ? Image : instance.Image,

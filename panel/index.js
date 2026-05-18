@@ -1,6 +1,6 @@
 /*
  *  INVMC Panel 4.0
- *  (c) 2025 Hopingboyz
+ *  (c) 2025 OddBoyXD
  *
  */
 
