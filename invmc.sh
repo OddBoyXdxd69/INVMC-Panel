@@ -26,10 +26,10 @@ install_panel() {
     
     IP=$(curl -s --connect-timeout 5 ifconfig.me || echo "localhost")
     read -p "Enter Domain/IP [Default: $IP]: " u_dom </dev/tty
-    raw_domain=${u_dom:-$IP}; echo "$raw_domain" > ~/.invmc_domain
+    raw_domain=${u_dom:-$IP}; echo "$raw_domain" > /root/.invmc_domain
 
     read -p "Enter Web Port [Default: 3000]: " u_port </dev/tty
-    panel_port=${u_port:-3000}; echo "$panel_port" > ~/.invmc_port
+    panel_port=${u_port:-3000}; echo "$panel_port" > /root/.invmc_port
     
     echo -e "\n${BLUE}=>${NC} Preparing system..."
     silent apt-get update -y
