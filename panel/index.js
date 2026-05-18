@@ -151,7 +151,7 @@ app.use(async (req, res, next) => {
     res.locals.settings = settings || {};
     res.locals.name = res.locals.settings.name || "INVMC Panel";
     res.locals.logo = res.locals.settings.logo !== undefined ? res.locals.settings.logo : true;
-    res.locals.logoUrl = res.locals.settings.logoUrl || "/assets/logo.png";
+    res.locals.logoUrl = res.locals.settings.logoUrl || "https://i.ibb.co/mrHNJD2y/WB-2.png";
     res.locals.footerText = res.locals.settings.footerText || "© 2026 INVMC | Author: OddBoyXD | All Rights Reserved";
     
     res.locals.languages = getLanguages();
