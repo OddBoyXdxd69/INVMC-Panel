@@ -164,14 +164,14 @@ passport.deserializeUser(async (username, done) => {
   try {
     const users = await db.get("users");
     if (!users) {
-      throw new Error("User not found");
+      return done(null, null);
     }
 
     // Search for the user with the provided username in the users array
     const foundUser = users.find((user) => user.username === username);
 
     if (!foundUser) {
-      throw new Error("User not found");
+      return done(null, null);
     }
 
     done(null, foundUser); // Deserialize user by retrieving full user details from the database
