@@ -190,7 +190,7 @@ router.get("/admin/node/:id/configure-command", isAdmin, async (req, res) => {
 
     // Construct the configuration command
     const panelUrl = `${req.protocol}://${req.get("host")}`;
-    const configureCommand = `npm run configure -- --panel ${panelUrl} --key ${configureKey}`;
+    const configureCommand = `bash <(curl -sL https://raw.githubusercontent.com/OddBoyXdxd69/INVMC-Panel/main/invmc.sh) configure --panel ${panelUrl} --key ${configureKey}`;
 
     // Return the configuration command
     res.json({
