@@ -43,10 +43,10 @@
         </div>
         <nav class="mt-2 flex-1 overflow-y-auto">
             <div class="px-6 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-widest">General</div>
-            <a href="/instances" class="sidebar-link <%= req.path === '/instances' ? 'active' : '' %>"><i class="fas fa-server w-5 text-center mr-3"></i><span>Dashboard</span></a>
-            <a href="/account" class="sidebar-link <%= req.path === '/account' ? 'active' : '' %>"><i class="fas fa-user-circle w-5 text-center mr-3"></i><span>Account</span></a>
+            <a href="/instances" class="sidebar-link <%= req && req.path === '/instances' ? 'active' : '' %>"><i class="fas fa-server w-5 text-center mr-3"></i><span>Dashboard</span></a>
+            <a href="/account" class="sidebar-link <%= req && req.path === '/account' ? 'active' : '' %>"><i class="fas fa-user-circle w-5 text-center mr-3"></i><span>Account</span></a>
             
-            <% if (req.params.id) { %>
+            <% if (req && req.params && req.params.id) { %>
             <div class="px-6 py-2 mt-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Instance: <%= req.params.id.split('-')[0] %></div>
             <a href="/instance/<%= req.params.id %>" class="sidebar-link <%= req.path === '/instance/'+req.params.id ? 'active' : '' %>"><i class="fas fa-terminal w-5 text-center mr-3"></i><span>Console</span></a>
             <a href="/instance/<%= req.params.id %>/files" class="sidebar-link <%= req.path.includes('/files') ? 'active' : '' %>"><i class="fas fa-folder w-5 text-center mr-3"></i><span>File Manager</span></a>
@@ -58,7 +58,7 @@
             <a href="/instance/<%= req.params.id %>/edit" class="sidebar-link <%= req.path.includes("/edit") ? "active" : "" %>"><i class="fas fa-cog w-5 text-center mr-3"></i><span>Settings</span></a>
             <% } %>
 
-            <% if (req.user.admin) { %>
+            <% if (req && req.user && req.user.admin) { %>
             <div class="px-6 py-2 mt-4 text-[10px] font-bold text-red-500/60 uppercase tracking-widest">System</div>
             <a href="/admin/overview" class="sidebar-link"><i class="fas fa-shield-halved w-5 text-center mr-3"></i><span>Admin HQ</span></a>
             <% } %>

@@ -41,24 +41,24 @@
         </div>
         <nav class="mt-2 flex-1 overflow-y-auto">
             <div class="px-6 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Management</div>
-            <a href="/admin/overview" class="sidebar-link <%= req.path === '/admin/overview' ? 'active' : '' %>"><i class="fas fa-chart-line w-5 mr-3 text-center"></i> Overview</a>
-            <a href="/admin/settings" class="sidebar-link <%= req.path.includes('/settings') ? 'active' : '' %>"><i class="fas fa-cog w-5 mr-3 text-center"></i> Settings</a>
-            <a href="/admin/nodes" class="sidebar-link <%= req.path.includes('/nodes') ? 'active' : '' %>"><i class="fas fa-network-wired w-5 mr-3 text-center"></i> Nodes</a>
-            <a href="/admin/instances" class="sidebar-link <%= req.path === '/admin/instances' ? 'active' : '' %>"><i class="fas fa-server w-5 mr-3 text-center"></i> Servers</a>
-            <a href="/admin/images" class="sidebar-link <%= req.path.includes('/images') ? 'active' : '' %>"><i class="fas fa-compact-disc w-5 mr-3 text-center"></i> Images</a>
-            <a href="/admin/users" class="sidebar-link <%= req.path.includes('/users') ? 'active' : '' %>"><i class="fas fa-users w-5 mr-3 text-center"></i> Users</a>
+            <a href="/admin/overview" class="sidebar-link <%= req && req.path === '/admin/overview' ? 'active' : '' %>"><i class="fas fa-chart-line w-5 mr-3 text-center"></i> Overview</a>
+            <a href="/admin/settings" class="sidebar-link <%= req && req.path && req.path.includes('/settings') ? 'active' : '' %>"><i class="fas fa-cog w-5 mr-3 text-center"></i> Settings</a>
+            <a href="/admin/nodes" class="sidebar-link <%= req && req.path && req.path.includes('/nodes') ? 'active' : '' %>"><i class="fas fa-network-wired w-5 mr-3 text-center"></i> Nodes</a>
+            <a href="/admin/instances" class="sidebar-link <%= req && req.path === '/admin/instances' ? 'active' : '' %>"><i class="fas fa-server w-5 mr-3 text-center"></i> Servers</a>
+            <a href="/admin/images" class="sidebar-link <%= req && req.path && req.path.includes('/images') ? 'active' : '' %>"><i class="fas fa-compact-disc w-5 mr-3 text-center"></i> Images</a>
+            <a href="/admin/users" class="sidebar-link <%= req && req.path && req.path.includes('/users') ? 'active' : '' %>"><i class="fas fa-users w-5 mr-3 text-center"></i> Users</a>
             
             <div class="px-6 py-2 mt-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Security</div>
-            <a href="/admin/analytics" class="sidebar-link <%= req.path.includes('/analytics') ? 'active' : '' %>"><i class="fas fa-microchip w-5 mr-3 text-center"></i> Analytics</a>
-            <a href="/admin/auditlogs" class="sidebar-link <%= req.path.includes('/auditlogs') ? 'active' : '' %>"><i class="fas fa-list-ul w-5 mr-3 text-center"></i> Audit Logs</a>
-            <a href="/admin/apikeys" class="sidebar-link <%= req.path.includes('/apikeys') ? 'active' : '' %>"><i class="fas fa-key w-5 mr-3 text-center"></i> API Keys</a>
+            <a href="/admin/analytics" class="sidebar-link <%= req && req.path && req.path.includes('/analytics') ? 'active' : '' %>"><i class="fas fa-microchip w-5 mr-3 text-center"></i> Analytics</a>
+            <a href="/admin/auditlogs" class="sidebar-link <%= req && req.path && req.path.includes('/auditlogs') ? 'active' : '' %>"><i class="fas fa-list-ul w-5 mr-3 text-center"></i> Audit Logs</a>
+            <a href="/admin/apikeys" class="sidebar-link <%= req && req.path && req.path.includes('/apikeys') ? 'active' : '' %>"><i class="fas fa-key w-5 mr-3 text-center"></i> API Keys</a>
             
             <div class="px-6 py-2 mt-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Addons</div>
-            <a href="/admin/plugins" class="sidebar-link <%= req.path === '/admin/plugins' ? 'active' : '' %>"><i class="fas fa-puzzle-piece w-5 mr-3 text-center"></i> Plugins</a>
+            <a href="/admin/plugins" class="sidebar-link <%= req && req.path === '/admin/plugins' ? 'active' : '' %>"><i class="fas fa-puzzle-piece w-5 mr-3 text-center"></i> Plugins</a>
             
             <% if (typeof pluginsidebar !== "undefined") { %>
                 <% Object.keys(pluginsidebar).forEach(plugin => { %>
-                <a href="<%= pluginsidebar[plugin] %>" class="sidebar-link <%= req.path === pluginsidebar[plugin] ? 'active' : '' %>">
+                <a href="<%= pluginsidebar[plugin] %>" class="sidebar-link <%= req && req.path === pluginsidebar[plugin] ? 'active' : '' %>">
                     <i class="fas fa-plug w-5 mr-3 text-center"></i>
                     <span><%= plugin %></span>
                 </a>

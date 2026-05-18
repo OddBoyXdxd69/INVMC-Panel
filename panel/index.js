@@ -154,6 +154,9 @@ app.use(async (req, res, next) => {
     res.locals.logoUrl = res.locals.settings.logoUrl || "https://i.ibb.co/mrHNJD2y/WB-2.png";
     res.locals.footerText = res.locals.settings.footerText || "© 2026 INVMC | Author: OddBoyXD | All Rights Reserved";
     
+    res.locals.req = req;
+    res.locals.user = req.user || null;
+
     res.locals.languages = getLanguages();
     res.locals.plugins = plugins;
     next();
