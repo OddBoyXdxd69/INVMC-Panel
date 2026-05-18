@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin | <%= name %></title>
-    <link rel="icon" href="<%= settings.logoUrl || 'https://i.ibb.co/mrHNJD2y/WB-2.png' %>" type="image/x-icon">
+    <link rel="icon" href="<%= logoUrl %>" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -33,9 +33,9 @@
     <div x-show="sidebarOpen" @click="sidebarOpen = false" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden" x-transition></div>
     <aside class="sidebar" :class="{ 'open': sidebarOpen }">
         <div class="p-6 flex items-center gap-3">
-            <img src="<%= settings.logoUrl || 'https://i.ibb.co/mrHNJD2y/WB-2.png' %>" class="w-10 h-10 rounded-lg shadow-[0_0_10px_rgba(239,68,68,0.3)]" alt="Logo">
+            <img src="<%= logoUrl %>" class="w-10 h-10 rounded-lg shadow-[0_0_10px_rgba(239,68,68,0.3)]" alt="Logo">
             <div>
-                <h1 class="font-bold text-white tracking-tight leading-none text-lg">INVMC</h1>
+                <h1 class="font-bold text-white tracking-tight leading-none text-lg"><%= name %></h1>
                 <p class="text-[9px] text-red-400 font-mono uppercase tracking-widest mt-1">Admin HQ</p>
             </div>
         </div>

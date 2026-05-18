@@ -931,14 +931,41 @@ router.post(
   },
 );
 
+router.post("/admin/settings/change/name", isAdmin, async (req, res) => {
+  const { name } = req.body;
+  try {
+    let settings = (await db.get("settings")) || {};
+    settings.name = name;
+    await db.set("settings", settings);
+    logAudit(req.user.userId, req.user.username, "name:edit", req.ip);
+    res.redirect("/admin/settings?msg=NameUpdated");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Database error");
+  }
+});
+
 router.post("/admin/settings/change/logo-url", isAdmin, async (req, res) => {
   const { logoUrl } = req.body;
   try {
     let settings = (await db.get("settings")) || {};
     settings.logoUrl = logoUrl;
+    settings.logo = true;
     await db.set("settings", settings);
-    await db.set("logo", true); // Ensure logo is enabled if URL is set
     res.redirect("/admin/settings?msg=LogoUpdated");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Database error");
+  }
+});
+
+router.post("/admin/settings/change/footer", isAdmin, async (req, res) => {
+  const { footerText } = req.body;
+  try {
+    let settings = (await db.get("settings")) || {};
+    settings.footerText = footerText;
+    await db.set("settings", settings);
+    res.redirect("/admin/settings?msg=FooterUpdated");
   } catch (err) {
     console.error(err);
     res.status(500).send("Database error");
@@ -954,18 +981,6 @@ router.post("/admin/settings/social", isAdmin, async (req, res) => {
     settings.support = support;
     await db.set("settings", settings);
     res.redirect("/admin/settings?msg=SocialUpdated");
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Database error");
-  }
-});
-
-router.post("/admin/settings/change/name", isAdmin, async (req, res) => {
-  const name = req.body.name;
-  try {
-    await db.set("name", [name]);
-    logAudit(req.user.userId, req.user.username, "name:edit", req.ip);
-    res.redirect("/admin/settings?changednameto=" + name);
   } catch (err) {
     console.error(err);
     res.status(500).send("Database error");
@@ -1105,34 +1120,20 @@ router.post(
   isAdmin,
   upload.single("logo"),
   async (req, res) => {
-    const type = req.body.type;
-
     try {
-      if (type === "image" && req.file) {
-        // Image uploaded successfully
-        await db.set("logo", true);
-        res.redirect("/admin/settings");
-      } else if (type === "none") {
-        // Remove existing logo
-        const logoPath = path.join(
-          __dirname,
-          "..",
-          "public",
-          "assets",
-          "logo.png",
-        );
-        if (fs.existsSync(logoPath)) {
-          fs.unlinkSync(logoPath);
-        }
-        await db.set("logo", false);
-        logAudit(req.user.userId, req.user.username, "logo:edit", req.ip);
-        res.redirect("/admin/settings");
+      if (req.file) {
+        let settings = (await db.get("settings")) || {};
+        settings.logoUrl = "/assets/logo.png";
+        settings.logo = true;
+        await db.set("settings", settings);
+        logAudit(req.user.userId, req.user.username, "logo:upload", req.ip);
+        res.redirect("/admin/settings?msg=LogoUploaded");
       } else {
-        res.status(400).send("Invalid request");
+        res.status(400).send("No file uploaded");
       }
     } catch (err) {
       console.error(err);
-      res.status(500).send("Error processing logo change: " + err.message);
+      res.status(500).send("Error processing logo upload: " + err.message);
     }
   },
 );
@@ -1140,13 +1141,17 @@ router.post(
 router.post(
   "/admin/settings/toggle/register",
   isAdmin,
-  upload.single("logo"),
   async (req, res) => {
-    let settings = await db.get("settings");
-    settings.register = !settings.register;
-    await db.set("settings", settings);
-    logAudit(req.user.userId, req.user.username, "register:edit", req.ip);
-    res.redirect("/admin/settings");
+    try {
+      let settings = (await db.get("settings")) || {};
+      settings.register = !settings.register;
+      await db.set("settings", settings);
+      logAudit(req.user.userId, req.user.username, "register:edit", req.ip);
+      res.redirect("/admin/settings");
+    } catch (err) {
+      console.error(err);
+      res.status(500).send("Database error");
+    }
   },
 );
 /**

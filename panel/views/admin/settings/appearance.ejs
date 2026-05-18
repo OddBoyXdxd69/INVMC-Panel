@@ -1,74 +1,128 @@
 <%- include('../../components/admin_template') %>
 
-<main class="relative">
+<main class="relative animate-fade-in">
   <!-- Enhanced Header -->
   <div class="px-6 pt-6 pb-4 border-b border-neutral-800 bg-gradient-to-r from-neutral-900 to-neutral-800">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div>
         <h1 class="text-2xl font-bold text-white flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          <%= req.translations.settings %>
+          <i class="fas fa-palette text-indigo-400"></i>
+          Branding & Appearance
         </h1>
-        <p class="mt-1 text-sm text-neutral-400">Change appearance and social settings for INVMC.</p>
+        <p class="mt-1 text-sm text-neutral-400">Customize your INVMC Panel identity and social presence.</p>
       </div>
     </div>
   </div>
 
   <%- include('../../components/settings') %>
 
-  <div class="px-6 py-6">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Panel Branding Card -->
-      <div class="bg-neutral-900 rounded-xl border border-neutral-800 overflow-hidden shadow-lg">
-        <div class="px-5 py-4 border-b border-neutral-800 bg-neutral-800/50">
-          <h2 class="text-lg font-semibold text-white">Panel Branding</h2>
+  <div class="px-4 sm:px-6 py-6">
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      
+      <!-- Panel Identity Card -->
+      <div class="bg-neutral-900/50 backdrop-blur-md rounded-2xl border border-neutral-800 overflow-hidden shadow-xl">
+        <div class="px-6 py-4 border-b border-neutral-800 bg-neutral-800/30">
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <i class="fas fa-id-card text-indigo-400 text-sm"></i> Panel Identity
+          </h2>
         </div>
-        <div class="p-5 space-y-6">
-          <form action="/admin/settings/change/name" method="POST" class="space-y-2">
-            <label class="block text-sm font-medium text-neutral-300">Panel Name</label>
-            <div class="flex gap-2">
-              <input name="name" type="text" value="<%= name %>" class="flex-1 bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
-              <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">Save</button>
+        <div class="p-6 space-y-8">
+          <!-- Change Name -->
+          <form action="/admin/settings/change/name" method="POST" class="space-y-3">
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-widest">Panel Name</label>
+            <div class="flex flex-col sm:flex-row gap-3">
+              <input name="name" type="text" value="<%= name %>" class="flex-1 bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+              <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-sm font-bold transition shadow-lg shadow-indigo-600/20">Save Name</button>
             </div>
           </form>
 
-          <form action="/admin/settings/change/logo-url" method="POST" class="space-y-2">
-            <label class="block text-sm font-medium text-neutral-300">Logo URL</label>
-            <div class="flex gap-2">
-              <input name="logoUrl" type="text" value="<%= settings.logoUrl || '' %>" placeholder="https://example.com/logo.png" class="flex-1 bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
-              <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">Update</button>
+          <!-- Change Footer -->
+          <form action="/admin/settings/change/footer" method="POST" class="space-y-3">
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-widest">Footer Copyright Text</label>
+            <div class="flex flex-col sm:flex-row gap-3">
+              <input name="footerText" type="text" value="<%= footerText %>" class="flex-1 bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+              <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-sm font-bold transition shadow-lg shadow-indigo-600/20">Update Footer</button>
+            </div>
+            <p class="text-[10px] text-neutral-500 italic">This appears at the bottom of every page.</p>
+          </form>
+        </div>
+      </div>
+
+      <!-- Logo Management Card -->
+      <div class="bg-neutral-900/50 backdrop-blur-md rounded-2xl border border-neutral-800 overflow-hidden shadow-xl">
+        <div class="px-6 py-4 border-b border-neutral-800 bg-neutral-800/30">
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <i class="fas fa-image text-indigo-400 text-sm"></i> Logo Management
+          </h2>
+        </div>
+        <div class="p-6 space-y-8">
+          <!-- Upload File -->
+          <form action="/admin/settings/change/logo" method="POST" enctype="multipart/form-data" class="space-y-3">
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-widest">Upload Logo File</label>
+            <div class="flex flex-col sm:flex-row gap-3 items-center">
+                <div class="w-16 h-16 rounded-xl bg-neutral-800 border border-neutral-700 flex items-center justify-center overflow-hidden flex-shrink-0">
+                    <img src="<%= logoUrl %>" class="max-w-full max-h-full object-contain" alt="Current Logo">
+                </div>
+                <input name="logo" type="file" class="flex-1 text-sm text-neutral-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-indigo-600/10 file:text-indigo-400 hover:file:bg-indigo-600/20 transition cursor-pointer">
+                <button type="submit" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-sm font-bold transition">Upload</button>
+            </div>
+          </form>
+
+          <div class="relative">
+              <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-neutral-800"></div></div>
+              <div class="relative flex justify-center text-xs"><span class="px-2 bg-neutral-900 text-neutral-600 font-bold uppercase">OR USE URL</span></div>
+          </div>
+
+          <!-- Use URL -->
+          <form action="/admin/settings/change/logo-url" method="POST" class="space-y-3">
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-widest">Logo Image URL</label>
+            <div class="flex flex-col sm:flex-row gap-3">
+              <input name="logoUrl" type="text" value="<%= settings.logoUrl || '' %>" placeholder="https://example.com/logo.png" class="flex-1 bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+              <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-sm font-bold transition">Apply URL</button>
             </div>
           </form>
         </div>
       </div>
 
-      <!-- Social Links Card -->
-      <div class="bg-neutral-900 rounded-xl border border-neutral-800 overflow-hidden shadow-lg">
-        <div class="px-5 py-4 border-b border-neutral-800 bg-neutral-800/50">
-          <h2 class="text-lg font-semibold text-white">Social & Support Links</h2>
+      <!-- Social Connections Card -->
+      <div class="bg-neutral-900/50 backdrop-blur-md rounded-2xl border border-neutral-800 overflow-hidden shadow-xl xl:col-span-2">
+        <div class="px-6 py-4 border-b border-neutral-800 bg-neutral-800/30">
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <i class="fas fa-share-nodes text-indigo-400 text-sm"></i> Social & Support Presence
+          </h2>
         </div>
-        <div class="p-5">
-          <form action="/admin/settings/social" method="POST" class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-neutral-300">GitHub Repository URL</label>
-              <input name="github" type="text" value="<%= settings.github || 'https://github.com/OddBoyXdxd69/INVMC-Panel' %>" class="w-full mt-1 bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <div class="p-6">
+          <form action="/admin/settings/social" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="space-y-2">
+              <label class="block text-xs font-bold text-neutral-500 uppercase tracking-widest">GitHub Repository</label>
+              <div class="relative">
+                  <i class="fab fa-github absolute left-4 top-3.5 text-neutral-500"></i>
+                  <input name="github" type="text" value="<%= settings.github || '' %>" placeholder="https://github.com/..." class="w-full bg-neutral-800 border border-neutral-700 rounded-xl pl-11 pr-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+              </div>
             </div>
-            <div>
-              <label class="block text-sm font-medium text-neutral-300">Discord Invite URL</label>
-              <input name="discord" type="text" value="<%= settings.discord || 'https://discord.gg/invmc' %>" class="w-full mt-1 bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <div class="space-y-2">
+              <label class="block text-xs font-bold text-neutral-500 uppercase tracking-widest">Discord Server</label>
+              <div class="relative">
+                  <i class="fab fa-discord absolute left-4 top-3.5 text-neutral-500"></i>
+                  <input name="discord" type="text" value="<%= settings.discord || '' %>" placeholder="https://discord.gg/..." class="w-full bg-neutral-800 border border-neutral-700 rounded-xl pl-11 pr-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+              </div>
             </div>
-            <div>
-              <label class="block text-sm font-medium text-neutral-300">Support/Donation URL</label>
-              <input name="support" type="text" value="<%= settings.support || '' %>" class="w-full mt-1 bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <div class="space-y-2">
+              <label class="block text-xs font-bold text-neutral-500 uppercase tracking-widest">Donation / Support</label>
+              <div class="relative">
+                  <i class="fas fa-heart absolute left-4 top-3.5 text-neutral-500"></i>
+                  <input name="support" type="text" value="<%= settings.support || '' %>" placeholder="https://paypal.me/..." class="w-full bg-neutral-800 border border-neutral-700 rounded-xl pl-11 pr-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+              </div>
             </div>
-            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-sm font-semibold transition">Save All Links</button>
+            <div class="md:col-span-3 pt-4">
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-4 rounded-2xl text-sm font-extrabold uppercase tracking-widest transition shadow-xl shadow-indigo-600/20">Save Social Profile</button>
+            </div>
           </form>
         </div>
       </div>
+
     </div>
   </div>
 </main>
+
 <%- include('../../components/footer') %>

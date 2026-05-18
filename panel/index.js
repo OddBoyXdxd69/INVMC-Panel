@@ -148,14 +148,13 @@ app.use(async (req, res, next) => {
   try {
     const settings = await db.get("settings");
 
-    res.locals.settings = settings;
+    res.locals.settings = settings || {};
+    res.locals.name = res.locals.settings.name || "INVMC Panel";
+    res.locals.logo = res.locals.settings.logo !== undefined ? res.locals.settings.logo : true;
+    res.locals.logoUrl = res.locals.settings.logoUrl || "/assets/logo.png";
+    res.locals.footerText = res.locals.settings.footerText || "© 2026 INVMC | Author: OddBoyXD | All Rights Reserved";
+    
     res.locals.languages = getLanguages();
-    res.locals.ogTitle = config.ogTitle;
-    res.locals.ogDescription = config.ogDescription;
-    res.locals.footer = settings.footer;
-    res.locals.theme = theme;
-    res.locals.name = settings.name;
-    res.locals.logo = settings.logo;
     res.locals.plugins = plugins;
     next();
   } catch (error) {
