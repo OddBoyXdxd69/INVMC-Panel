@@ -119,21 +119,13 @@ wss.on('connection', (ws, req) => {
 
     async function setupConsole(ws, container) {
         try {
-            // 1. Send initial status
+            // 1. Send status immediately
             const data = await container.inspect();
             ws.send(JSON.stringify({ type: 'status', status: data.State.Running ? 'online' : 'offline' }));
 
-            // 2. Send last 50 lines of logs as history
-            const logs = await container.logs({
-                stdout: true,
-                stderr: true,
-                tail: 50,
-                timestamps: false
-            });
-            ws.send(logs.toString());
-
-            // 3. Attach for real-time live output
+            // 2. Attach with logs and follow (Dockerode attach supports this)
             const stream = await container.attach({
+                logs: true,
                 stream: true,
                 stdout: true,
                 stderr: true,
@@ -143,14 +135,15 @@ wss.on('connection', (ws, req) => {
             
             logStream = stream;
 
+            // Stream data to WebSocket
             stream.on('data', chunk => {
-                if (ws.readyState === WebSocket.OPEN) {
-                    ws.send(chunk.toString());
+                if (ws.readyState === 1) { // WebSocket.OPEN
+                    ws.send(chunk.toString('utf8'));
                 }
             });
 
-            // 4. Handle incoming commands from panel
-            ws.on('message', async (message) => {
+            // Handle browser commands
+            ws.on('message', (message) => {
                 try {
                     const msg = JSON.parse(message);
                     if (msg.event === 'cmd' && msg.command) {
@@ -160,12 +153,12 @@ wss.on('connection', (ws, req) => {
             });
 
             stream.on('error', err => {
-                log.error('Console stream error:', err);
+                console.error('Attach stream error:', err);
             });
 
         } catch (e) {
-            log.error('Console setup failed:', e);
-            ws.send(`\r\n\x1b[31m[INVMC] Failed to connect to server console: ${e.message}\x1b[0m\r\n`);
+            console.error('Console setup error:', e);
+            ws.send(`\r\n\x1b[31m[INVMC] Console connection failed: ${e.message}\x1b[0m\r\n`);
         }
     }
 
