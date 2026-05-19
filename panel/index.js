@@ -156,6 +156,7 @@ app.use(async (req, res, next) => {
     
     res.locals.req = req;
     res.locals.user = req.user || null;
+    res.locals.theme = theme;
 
     res.locals.languages = getLanguages();
     res.locals.plugins = plugins;
