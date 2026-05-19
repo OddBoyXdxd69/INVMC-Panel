@@ -1,114 +1,182 @@
 <%- include('../components/template') %>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js"></script>
+<!-- Pro Scripts -->
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/xterm.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/xterm.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/addons/attach/attach.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/addons/fit/fit.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
 <style>
-    .glass-card { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1rem; transition: all 0.3s ease; }
-    .glass-card:hover { border-color: rgba(99, 102, 241, 0.3); box-shadow: 0 0 20px rgba(99, 102, 241, 0.1); }
-    .stat-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.4); font-weight: 700; }
-    .stat-value { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #fff; }
-    #terminal { background: #000; border-radius: 0 0 0.75rem 0.75rem; padding: 10px; min-height: 350px; }
-    .terminal-header { background: rgba(30, 41, 59, 0.8); border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding: 0.75rem 1.25rem; border-radius: 0.75rem 0.75rem 0 0; }
-    .power-btn { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 600; letter-spacing: 0.025em; cursor: pointer; }
-    .power-btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
-    .power-btn:active { transform: scale(0.98); }
-    .power-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    .badge-status { padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; border: 1px solid transparent; }
+    .glass-card {
+        background: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        transition: all 0.3s ease;
+    }
+    .glass-card:hover {
+        border-color: rgba(99, 102, 241, 0.4);
+        box-shadow: 0 0 30px rgba(99, 102, 241, 0.15);
+    }
+    .stat-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: rgba(255, 255, 255, 0.5);
+        font-weight: 800;
+    }
+    .stat-value {
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 700;
+        color: #fff;
+    }
+    #terminal {
+        background: #000;
+        border-radius: 0 0 0.75rem 0.75rem;
+        padding: 12px;
+        min-height: 400px;
+    }
+    .terminal-header {
+        background: rgba(30, 41, 59, 0.9);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0.85rem 1.5rem;
+        border-radius: 0.75rem 0.75rem 0 0;
+    }
+    .power-btn {
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.6rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+    }
+    .power-btn:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.2);
+    }
+    .badge-status {
+        padding: 0.3rem 0.9rem;
+        border-radius: 9999px;
+        font-size: 0.7rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
 </style>
 
 <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 opacity-0" id="main-content">
     <%- include('../components/instance') %>
 
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+    <!-- Header: Server Identity -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
         <div>
-            <div class="flex items-center gap-3">
-                <h1 class="text-3xl font-extrabold text-white tracking-tight"><%= instance.Name %></h1>
-                <span id="status-badge" class="badge-status bg-gray-700 text-gray-400">Offline</span>
+            <div class="flex items-center gap-4">
+                <h1 class="text-3xl font-black text-white tracking-tight"><%= instance.Name %></h1>
+                <span id="status-badge" class="badge-status bg-gray-800 text-gray-400 border border-white/5">Offline</span>
             </div>
-            <p class="text-sm text-gray-500 mt-1 font-mono"><%= instance.Id %></p>
+            <p class="text-xs text-gray-500 mt-2 font-mono tracking-widest uppercase"><%= instance.Id %></p>
         </div>
         
-        <div class="flex flex-wrap gap-2 w-full md:w-auto">
-            <button onclick="powerAction('start')" class="power-btn flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-900/20">
+        <div class="flex flex-wrap gap-3 w-full md:w-auto">
+            <button onclick="powerAction('start')" class="power-btn flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-xl shadow-xl shadow-emerald-900/30">
                 <i class="fas fa-play"></i> Start
             </button>
-            <button onclick="powerAction('restart')" class="power-btn flex-1 md:flex-none bg-amber-600 hover:bg-amber-500 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-amber-900/20">
+            <button onclick="powerAction('restart')" class="power-btn flex-1 md:flex-none bg-amber-600 hover:bg-amber-500 text-white px-6 py-3 rounded-xl shadow-xl shadow-amber-900/30">
                 <i class="fas fa-redo"></i> Restart
             </button>
-            <button onclick="powerAction('stop')" class="power-btn flex-1 md:flex-none bg-rose-600 hover:bg-rose-500 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-rose-900/20">
+            <button onclick="powerAction('stop')" class="power-btn flex-1 md:flex-none bg-rose-600 hover:bg-rose-500 text-white px-6 py-3 rounded-xl shadow-xl shadow-rose-900/30">
                 <i class="fas fa-stop"></i> Stop
             </button>
-            <button onclick="powerAction('kill')" class="power-btn flex-1 md:flex-none bg-gray-800 hover:bg-gray-700 text-gray-300 px-5 py-2.5 rounded-xl">
+            <button onclick="powerAction('kill')" class="power-btn flex-1 md:flex-none bg-neutral-800 hover:bg-neutral-700 text-neutral-300 px-6 py-3 rounded-xl border border-white/5">
                 <i class="fas fa-bolt text-rose-500"></i> Kill
             </button>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div class="glass-card p-5">
-            <p class="stat-label">CPU Usage</p>
-            <span id="cpu-usage" class="stat-value text-2xl">0%</span>
-            <div class="w-full bg-white/5 h-1.5 mt-3 rounded-full overflow-hidden">
-                <div id="cpu-bar" class="bg-indigo-500 h-full transition-all duration-500" style="width: 0%"></div>
+    <!-- Live Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="glass-card p-6">
+            <p class="stat-label">System CPU</p>
+            <div class="flex items-end gap-2 mt-2">
+                <span id="cpu-usage" class="stat-value text-3xl">0%</span>
+            </div>
+            <div class="w-full bg-white/5 h-2 mt-4 rounded-full overflow-hidden">
+                <div id="cpu-bar" class="bg-indigo-500 h-full transition-all duration-700" style="width: 0%"></div>
             </div>
         </div>
-        <div class="glass-card p-5">
-            <p class="stat-label">Memory</p>
-            <span id="ram-usage" class="stat-value text-2xl">0 MB</span>
-            <div class="w-full bg-white/5 h-1.5 mt-3 rounded-full overflow-hidden">
-                <div id="ram-bar" class="bg-blue-500 h-full transition-all duration-500" style="width: 0%"></div>
+        <div class="glass-card p-6">
+            <p class="stat-label">Memory Allocation</p>
+            <div class="flex items-end gap-2 mt-2">
+                <span id="ram-usage" class="stat-value text-3xl">0 MB</span>
+                <span class="text-xs font-bold text-gray-500 mb-1.5">/ <%= instance.Memory %> MB</span>
+            </div>
+            <div class="w-full bg-white/5 h-2 mt-4 rounded-full overflow-hidden">
+                <div id="ram-bar" class="bg-blue-500 h-full transition-all duration-700" style="width: 0%"></div>
             </div>
         </div>
-        <div class="glass-card p-5">
-            <p class="stat-label">Storage</p>
-            <span id="disk-usage" class="stat-value text-2xl">0 MB</span>
-            <div class="w-full bg-white/5 h-1.5 mt-3 rounded-full overflow-hidden">
-                <div id="disk-bar" class="bg-emerald-500 h-full" style="width: 15%"></div>
+        <div class="glass-card p-6">
+            <p class="stat-label">Disk Storage</p>
+            <div class="flex items-end gap-2 mt-2">
+                <span id="disk-usage" class="stat-value text-3xl">0 MB</span>
+                <span class="text-xs font-bold text-gray-500 mb-1.5">/ <%= (parseInt(instance.Disk) || 0) * 1024 %> MB</span>
+            </div>
+            <div class="w-full bg-white/5 h-2 mt-4 rounded-full overflow-hidden">
+                <div id="disk-bar" class="bg-emerald-500 h-full transition-all duration-700" style="width: 10%"></div>
             </div>
         </div>
-        <div class="glass-card p-5">
-            <p class="stat-label">Address</p>
-            <div class="mt-1 flex items-center justify-between">
-                <span class="stat-value text-sm text-indigo-300"><%= instance.Node.address %>:<%= instance.Primary %></span>
-                <button onclick="copyAddr()" class="text-gray-500 hover:text-white transition-colors"><i class="fas fa-copy"></i></button>
+        <div class="glass-card p-6">
+            <p class="stat-label">Network Entry</p>
+            <div class="mt-2 flex items-center justify-between">
+                <span class="stat-value text-sm text-indigo-400 tracking-wider"><%= instance.Node.address %>:<%= instance.Primary %></span>
+                <button onclick="copyAddr()" class="text-gray-500 hover:text-white transition-all hover:scale-125"><i class="fas fa-copy"></i></button>
             </div>
+            <p class="text-[9px] text-gray-600 mt-4 font-black uppercase tracking-tighter">SFTP PORT: <%= instance.Node.port %></p>
         </div>
     </div>
 
-    <div class="glass-card overflow-hidden">
+    <!-- Terminal Area -->
+    <div class="glass-card overflow-hidden shadow-2xl">
         <div class="terminal-header flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <div class="flex gap-1.5">
-                    <div class="w-2.5 h-2.5 rounded-full bg-rose-500/50"></div>
-                    <div class="w-2.5 h-2.5 rounded-full bg-amber-500/50"></div>
-                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500/50"></div>
+            <div class="flex items-center gap-3">
+                <div class="flex gap-2">
+                    <div class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></div>
                 </div>
-                <span class="text-xs font-bold text-gray-400 uppercase tracking-widest ml-2">Secure Console</span>
+                <span class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] ml-3">Secure Command Interface</span>
             </div>
+            <div class="text-[10px] font-bold font-mono text-indigo-500/50 uppercase tracking-widest">Connection: Encrypted</div>
         </div>
         <div id="terminal"></div>
-        <div class="bg-black/40 p-3 border-t border-white/5">
-            <div class="flex items-center gap-3 px-3">
-                <span class="text-indigo-500 font-mono font-bold">$</span>
-                <input type="text" id="input" class="w-full bg-transparent border-none focus:ring-0 text-gray-300 font-mono text-sm placeholder-gray-700" placeholder="Type command here...">
+        <div class="bg-black/60 p-4 border-t border-white/5">
+            <div class="flex items-center gap-4 px-4">
+                <span class="text-indigo-500 font-mono font-black text-lg">❯</span>
+                <input type="text" id="input" class="w-full bg-transparent border-none focus:ring-0 text-gray-100 font-mono text-sm placeholder-gray-800" placeholder="Execute system command...">
             </div>
         </div>
     </div>
 </main>
 
 <script>
-    gsap.to("#main-content", { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" });
+    gsap.to("#main-content", { opacity: 1, y: 0, duration: 0.8, ease: "power4.out" });
 
     const term = new Terminal({
         cursorBlink: true,
         fontFamily: 'JetBrains Mono, monospace',
         fontSize: 13,
-        theme: { background: 'transparent', foreground: '#e5e7eb', cursor: '#6366f1' },
-        rows: 20
+        theme: {
+            background: 'transparent',
+            foreground: '#f8fafc',
+            cursor: '#6366f1',
+            selection: 'rgba(99, 102, 241, 0.3)'
+        },
+        rows: 22,
+        cols: 100
     });
     
     term.open(document.getElementById('terminal'));
@@ -119,25 +187,35 @@
     let ws;
     function connectWS() {
         const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-        ws = new WebSocket(`${protocol}://${window.location.host}/console/<%= req.params.id %>`);
+        const port = window.location.port ? `:${window.location.port}` : '';
+        ws = new WebSocket(`${protocol}://${window.location.hostname}${port}/console/<%= req.params.id %>`);
         
-        ws.onmessage = (event) => {
+        ws.onmessage = async (event) => {
+            let data = event.data;
+            
+            // Handle Blob data
+            if (data instanceof Blob) {
+                data = await data.text();
+            }
+
             try {
-                if (event.data.startsWith('{')) {
-                    const data = JSON.parse(event.data);
-                    if (data.type === 'status') updateStatus(data.status);
-                    else if (data.type === 'stats') updateStats(data.stats);
-                    else if (data.type === 'console') term.write(data.line);
+                if (typeof data === 'string' && data.startsWith('{')) {
+                    const parsed = JSON.parse(data);
+                    if (parsed.type === 'status') updateStatus(parsed.status);
+                    else if (parsed.type === 'stats') updateStats(parsed.stats);
+                    else if (parsed.type === 'console') term.write(parsed.line);
                 } else {
-                    term.write(event.data);
+                    term.write(data);
                 }
             } catch (e) {
-                term.write(event.data);
+                term.write(data);
             }
         };
 
-        ws.onclose = () => setTimeout(connectWS, 3000);
-        ws.onerror = () => ws.close();
+        ws.onclose = () => {
+            term.write('\r\n\x1b[31m[SYSTEM] Connection lost. Retrying...\x1b[0m\r\n');
+            setTimeout(connectWS, 3000);
+        };
     }
     connectWS();
 
@@ -146,19 +224,20 @@
         if (!badge) return;
         badge.textContent = status;
         if (status === 'online' || status === 'running') {
-            badge.className = 'badge-status bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+            badge.className = 'badge-status bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]';
         } else if (status === 'starting') {
-            badge.className = 'badge-status bg-amber-500/10 text-amber-500 border-amber-500/20 animate-pulse';
+            badge.className = 'badge-status bg-amber-500/10 text-amber-500 border border-amber-500/20 animate-pulse';
         } else {
-            badge.className = 'badge-status bg-rose-500/10 text-rose-500 border-rose-500/20';
+            badge.className = 'badge-status bg-rose-500/10 text-rose-500 border border-rose-500/20';
         }
     }
 
     function updateStats(stats) {
         if (!stats) return;
+        
         const cpu = stats.cpu?.usage || (stats.cpu_stats ? calculateCPU(stats) : 0);
         const ram = stats.memory?.used || stats.memory_stats?.usage || 0;
-        const ramLimit = (<%= instance.Resources ? instance.Resources.memory : instance.Memory %> || 1024) * 1024 * 1024;
+        const ramLimit = (<%= instance.Memory %> || 1024) * 1024 * 1024;
         
         document.getElementById('cpu-usage').textContent = Math.round(cpu) + '%';
         document.getElementById('cpu-bar').style.width = Math.min(cpu, 100) + '%';
@@ -167,47 +246,52 @@
         document.getElementById('ram-usage').textContent = ramMB + ' MB';
         document.getElementById('ram-bar').style.width = Math.min((ram / ramLimit) * 100, 100) + '%';
         
-        if (stats.disk?.used !== undefined) {
-            const diskMB = Math.round(stats.disk.used / 1024 / 1024);
+        if (stats.disk?.used !== undefined || stats.volumeSize !== undefined) {
+            const diskUsedBytes = stats.disk?.used || (parseFloat(stats.volumeSize) * 1024 * 1024) || 0;
+            const diskMB = Math.round(diskUsedBytes / 1024 / 1024);
             document.getElementById('disk-usage').textContent = diskMB + ' MB';
+            const diskLimitMB = (<%= parseInt(instance.Disk) || 1 %>) * 1024;
+            document.getElementById('disk-bar').style.width = Math.min((diskMB / diskLimitMB) * 100, 100) + '%';
         }
     }
 
     function calculateCPU(stats) {
-        if (!stats.precpu_stats) return 0;
+        if (!stats.precpu_stats || !stats.cpu_stats) return 0;
         const cpuDelta = stats.cpu_stats.cpu_usage.total_usage - stats.precpu_stats.cpu_usage.total_usage;
         const systemDelta = stats.cpu_stats.system_cpu_usage - stats.precpu_stats.system_cpu_usage;
-        return systemDelta > 0 ? (cpuDelta / systemDelta) * stats.cpu_stats.online_cpus * 100 : 0;
+        const cores = stats.cpu_stats.online_cpus || 1;
+        return systemDelta > 0 ? (cpuDelta / systemDelta) * cores * 100 : 0;
     }
 
     document.getElementById('input').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
-            ws.send(JSON.stringify({ event: 'cmd', command: e.target.value }));
-            e.target.value = '';
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ event: 'cmd', command: e.target.value }));
+                e.target.value = '';
+            }
         }
     });
 
     async function powerAction(action) {
         try {
             await axios.post(`/instance/<%= req.params.id %>/power/${action}`);
-            term.write(`\r\n\u001b[1m\u001b[33m[INVMC] \u001b[0mSent ${action} request...\r\n`);
+            term.write(`\r\n\x1b[33m[INVMC] System signal sent: ${action.toUpperCase()}\x1b[0m\r\n`);
         } catch (error) {
-            alert('Error: ' + (error.response?.data?.error || 'Failed to connect to node'));
+            term.write(`\r\n\x1b[31m[ERROR] Node communication failed: ${error.message}\x1b[0m\r\n`);
         }
     }
 
     function copyAddr() {
-        navigator.clipboard.writeText('<%= instance.Node.address %>:<%= instance.Primary %>');
-        alert('Copied!');
+        const addr = '<%= instance.Node.address %>:<%= instance.Primary %>';
+        navigator.clipboard.writeText(addr);
+        alert('Address copied to clipboard!');
     }
 
     window.addEventListener('resize', () => fitAddon.fit());
     
-    // Stats polling fallback if WS doesn't send them
+    // Fallback stats request
     setInterval(() => {
-        if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ event: 'stats' }));
-        }
+        if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ event: 'stats' }));
     }, 2000);
 </script>
 <%- include('../components/footer') %>
