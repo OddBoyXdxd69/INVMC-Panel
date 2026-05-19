@@ -683,4 +683,27 @@ router.delete("/:id/files/delete/:filename", async (req, res) => {
   }
 });
 
+router.post("/:id/wget", async (req, res) => {
+  const { id } = req.params;
+  const { url, path: subPath } = req.body;
+  const volumePath = path.join(__dirname, "../volumes", id);
+
+  if (!url) return res.status(400).json({ message: "URL is required" });
+
+  try {
+    const fullPath = safePath(volumePath, subPath || "");
+    
+    // Use execFile with wget for security
+    execFile('wget', ['-P', fullPath, url, '--no-check-certificate'], (error, stdout, stderr) => {
+      if (error) {
+        console.error(`wget error: ${stderr}`);
+        return res.status(500).json({ message: "Failed to download file from URL" });
+      }
+      res.json({ message: "File downloaded successfully" });
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

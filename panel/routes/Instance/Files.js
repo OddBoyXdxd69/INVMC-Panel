@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { db } = require('../../handlers/db.js');
 const { isUserAuthorizedForContainer } = require('../../utils/authHelper');
-const { fetchFiles, FetchTotalContainerDisk } = require('../../utils/fileHelper');
+const { fetchFiles, FetchTotalContainerDisk, remoteDownload } = require('../../utils/fileHelper');
 
 const { loadPlugins } = require('../../plugins/loadPls.js');
 const path = require('path');
@@ -96,6 +96,21 @@ router.get("/instance/:id/files", async (req, res) => {
             }
         });
         console.log(error)
+    }
+});
+
+router.post("/instance/:id/files/wget", async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required' });
+    const { id } = req.params;
+    const { url, path } = req.body;
+    const instance = await db.get(id + '_instance');
+    if (!instance) return res.status(404).json({ error: 'Instance not found' });
+
+    try {
+        const result = await remoteDownload(instance, url, path);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: 'Remote download failed' });
     }
 });
 

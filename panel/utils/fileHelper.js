@@ -138,11 +138,25 @@ async function FetchTotalContainerDisk(instance) {
     return response.data;
 }
 
+async function remoteDownload(instance, downloadUrl, path = '') {
+    const url = `http://${instance.Node.address}:${instance.Node.port}/fs/${instance.VolumeId}/wget`;
+    
+    const response = await axios.post(url, { url: downloadUrl, path }, {
+        auth: {
+            username: 'INVMC',
+            password: instance.Node.apiKey
+        }
+    });
+
+    return response.data;
+}
+
 module.exports = {
     fetchFiles,
     FetchTotalContainerDisk,
     fetchFileContent,
     createFile,
     editFile,
-    deleteFile
+    deleteFile,
+    remoteDownload
 };
