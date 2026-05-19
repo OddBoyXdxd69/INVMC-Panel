@@ -63,9 +63,12 @@ app.get('/stats', async (req, res) => {
                 percent: (((os.totalmem() - os.freemem()) / os.totalmem()) * 100).toFixed(2)
             },
             cpu: {
-                usage: (os.loadavg()[0] * 100 / os.cpus().length).toFixed(2)
+                usage: (os.loadavg()[0] * 100 / os.cpus().length).toFixed(2),
+                cores: os.cpus().length
             },
-            status: 'Online'
+            uptime: `${Math.floor(os.uptime() / 86400)}d ${Math.floor((os.uptime() % 86400) / 3600)}h`,
+            status: 'Online',
+            timestamp: Date.now()
         };
         res.json(stats);
     } catch (e) {
@@ -97,14 +100,17 @@ wss.on('connection', (ws, req) => {
             if (msg.args[0] === config.key) {
                 isAuthenticated = true;
                 const parts = req.url.split('/');
-                const containerId = parts[2];
                 const type = parts[1]; // exec or stats
+                const containerId = parts[2];
 
                 if (!containerId) return ws.close(1008, "No Container ID");
                 currentContainer = docker.getContainer(containerId);
                 
-                if (type === 'exec') setupConsole(ws, currentContainer);
-                else if (type === 'stats') setupStats(ws, currentContainer, containerId);
+                if (type === 'exec') {
+                    setupConsole(ws, currentContainer);
+                } else if (type === 'stats') {
+                    setupStats(ws, currentContainer, containerId);
+                }
             } else {
                 ws.close(1008, "Auth Failed");
             }
@@ -117,14 +123,22 @@ wss.on('connection', (ws, req) => {
             const data = await container.inspect();
             ws.send(JSON.stringify({ type: 'status', status: data.State.Running ? 'online' : 'offline' }));
 
-            // 2. Start following logs (Real-time stream)
-            // Using 'follow: true' with 'tail: 50' gives the last 50 lines PLUS all new lines
-            const stream = await container.logs({
-                follow: true,
+            // 2. Send last 50 lines of logs as history
+            const logs = await container.logs({
                 stdout: true,
                 stderr: true,
                 tail: 50,
                 timestamps: false
+            });
+            ws.send(logs.toString());
+
+            // 3. Attach for real-time live output
+            const stream = await container.attach({
+                stream: true,
+                stdout: true,
+                stderr: true,
+                stdin: true,
+                hijack: true
             });
             
             logStream = stream;
@@ -135,27 +149,18 @@ wss.on('connection', (ws, req) => {
                 }
             });
 
-            // 3. Handle incoming commands from panel
+            // 4. Handle incoming commands from panel
             ws.on('message', async (message) => {
                 try {
                     const msg = JSON.parse(message);
                     if (msg.event === 'cmd' && msg.command) {
-                        // For commands, we need a separate attach stream
-                        const execStream = await container.attach({
-                            stream: true,
-                            stdin: true,
-                            stdout: false,
-                            stderr: false,
-                            hijack: true
-                        });
-                        execStream.write(msg.command + '\n');
-                        execStream.end();
+                        stream.write(msg.command + '\n');
                     }
                 } catch (e) {}
             });
 
             stream.on('error', err => {
-                log.error('Log stream error:', err);
+                log.error('Console stream error:', err);
             });
 
         } catch (e) {
@@ -164,29 +169,46 @@ wss.on('connection', (ws, req) => {
         }
     }
 
-
     async function setupStats(ws, container, id) {
         const sendStats = async () => {
             try {
-                const s1 = await new Promise((resolve, reject) => container.stats({ stream: false }, (err, s) => err ? reject(err) : resolve(s)));
-                const s2 = await new Promise((resolve, reject) => setTimeout(async () => {
-                   container.stats({ stream: false }, (err, s) => err ? reject(err) : resolve(s));
-                }, 500));
+                if (ws.readyState !== WebSocket.OPEN) return;
                 
+                // Get snapshots for CPU calculation
+                const s1 = await new Promise((resolve, reject) => {
+                    container.stats({ stream: false }, (err, s) => err ? reject(err) : resolve(s));
+                });
+                
+                await new Promise(r => setTimeout(r, 500));
+                
+                const s2 = await new Promise((resolve, reject) => {
+                    container.stats({ stream: false }, (err, s) => err ? reject(err) : resolve(s));
+                });
+                
+                if (!s1 || !s2 || !s1.cpu_stats || !s2.cpu_stats) return;
+
                 const cpuDelta = s2.cpu_stats.cpu_usage.total_usage - s1.cpu_stats.cpu_usage.total_usage;
                 const sysDelta = s2.cpu_stats.system_cpu_usage - s1.cpu_stats.system_cpu_usage;
-                const cpuUsage = sysDelta > 0 ? (cpuDelta / sysDelta) * s2.cpu_stats.online_cpus * 100 : 0;
+                const cores = s2.cpu_stats.online_cpus || 1;
+                const cpuUsage = sysDelta > 0 ? (cpuDelta / sysDelta) * cores * 100 : 0;
                 
+                const volumeSize = await getVolumeSize(id);
+
                 ws.send(JSON.stringify({
                     type: 'stats',
                     stats: {
-                        cpu: { usage: cpuUsage.toFixed(2) },
-                        memory: { used: s2.memory_stats.usage }
+                        cpu: { usage: cpuUsage.toFixed(1) },
+                        memory: { used: s2.memory_stats.usage },
+                        disk: { used: volumeSize * 1024 * 1024 }, // Convert to bytes
+                        status: s2.memory_stats.usage > 0 ? 'online' : 'offline'
                     }
                 }));
-            } catch (e) {}
+            } catch (e) {
+                // Ignore stats errors
+            }
         };
-        statsTask = setInterval(sendStats, 2000);
+        sendStats();
+        statsTask = setInterval(sendStats, 3000);
     }
 
     ws.on('close', () => {
@@ -196,3 +218,9 @@ wss.on('connection', (ws, req) => {
 });
 
 server.listen(config.port, () => log.info(`INVMC Daemon listening on port ${config.port}`));
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+    log.error(err.stack);
+    res.status(500).send('Daemon Error');
+});
