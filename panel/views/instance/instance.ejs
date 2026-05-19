@@ -138,16 +138,12 @@
     let ws;
     function connectWS() {
         const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-        const port = window.location.port ? `:${window.location.port}` : '';
-        ws = new WebSocket(`${protocol}://${window.location.hostname}${port}/console/<%= req.params.id %>`);
+        const port = window.location.port ? \`:\${window.location.port}\` : '';
+        ws = new WebSocket(\`\${protocol}://\${window.location.hostname}\${port}/console/<%= req.params.id %>\`);
         
         ws.onmessage = async (event) => {
             let data = event.data;
-            
-            // Handle Blob data
-            if (data instanceof Blob) {
-                data = await data.text();
-            }
+            if (data instanceof Blob) data = await data.text();
 
             try {
                 if (typeof data === 'string' && data.startsWith('{')) {
@@ -164,7 +160,7 @@
         };
 
         ws.onclose = () => {
-            term.write('\r\n\x1b[31m[SYSTEM] Connection lost. Retrying...\x1b[0m\r\n');
+            term.write('\\r\\n\\x1b[31m[SYSTEM] Connection lost. Retrying...\\x1b[0m\\r\\n');
             setTimeout(connectWS, 3000);
         };
     }
@@ -175,7 +171,7 @@
         if (!badge) return;
         badge.textContent = status;
         if (status === 'online' || status === 'running') {
-            badge.className = 'badge-status bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]';
+            badge.className = 'badge-status bg-emerald-500/10 text-emerald-500 border border-emerald-500/20';
         } else if (status === 'starting') {
             badge.className = 'badge-status bg-amber-500/10 text-amber-500 border border-amber-500/20 animate-pulse';
         } else {
@@ -185,8 +181,6 @@
 
     function updateStats(stats) {
         if (!stats) return;
-        
-        // Handle both formats (Panel stats and Docker raw stats)
         const cpu = stats.cpu?.usage || 0;
         const ram = stats.memory?.used || stats.memory_stats?.usage || 0;
         const ramLimit = (<%= instance.Memory %> || 1024) * 1024 * 1024;
@@ -197,15 +191,7 @@
         const ramMB = Math.round(ram / 1024 / 1024);
         document.getElementById('ram-usage').textContent = ramMB + ' MB';
         const ramPercent = (ram / ramLimit) * 100;
-        document.getElementById('ram-bar').style.width = Math.min((ram / ramLimit) * 100, 100) + '%';
-        
-        if (stats.disk?.used !== undefined || stats.volumeSize !== undefined) {
-            const diskUsedBytes = stats.disk?.used || (parseFloat(stats.volumeSize) * 1024 * 1024) || 0;
-            const diskMB = Math.round(diskUsedBytes / 1024 / 1024);
-            document.getElementById('disk-usage').textContent = diskMB + ' MB';
-            const diskLimitMB = (<%= parseInt(instance.Disk) || 1 %>) * 1024;
-            document.getElementById('disk-bar').style.width = Math.min((diskMB / diskLimitMB) * 100, 100) + '%';
-        }
+        document.getElementById('ram-bar').style.width = Math.min(ramPercent, 100) + '%';
     }
 
     document.getElementById('input').addEventListener('keypress', (e) => {
@@ -219,20 +205,14 @@
 
     async function powerAction(action) {
         try {
-            await axios.post(`/instance/<%= req.params.id %>/power/${action}`);
-            term.write(`\r\n\x1b[33m[INVMC] System signal sent: ${action.toUpperCase()}\x1b[0m\r\n`);
-        } catch (error) {
-            const msg = error.response?.data?.error || error.message;
+            await axios.post(\`/instance/<%= req.params.id %>/power/\${action}\`);
+            term.write(\`\\r\\n\\x1b[33m[INVMC] System signal sent: \${action.toUpperCase()}\\x1b[0m\\r\\n\`);
+        } catch (error) {\n            const msg = error.response?.data?.error || error.message;
             if (msg && msg.toLowerCase().includes("already")) {
-                term.write(`\r\n\x1b[32m[INVMC] Server is already in the requested state: ${action.toUpperCase()}\x1b[0m\r\n`);
+                term.write(\`\\r\\n\\x1b[32m[INVMC] Server is already in the requested state: \${action.toUpperCase()}\\x1b[0m\\r\\n\`);
             } else {
-                term.write(`\r\n\x1b[31m[ERROR] Node communication failed: ${msg}\x1b[0m\r\n`);
+                term.write(\`\\r\\n\\x1b[31m[ERROR] Node communication failed: \${msg}\\x1b[0m\\r\\n\`);
             }
-        }
-    }
-            term.write(`\r\n\x1b[33m[INVMC] System signal sent: ${action.toUpperCase()}\x1b[0m\r\n`);
-        } catch (error) {
-            term.write(`\r\n\x1b[31m[ERROR] Node communication failed: ${error.message}\x1b[0m\r\n`);
         }
     }
 
@@ -244,11 +224,9 @@
 
     window.addEventListener('resize', () => fitAddon.fit());
     
-    // Stats polling fallback if WS doesn't send them
+    // Fallback stats request
     setInterval(() => {
-        if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ event: 'stats' }));
-        }
+        if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ event: 'stats' }));
     }, 2000);
 </script>
 <%- include('../components/footer') %>
