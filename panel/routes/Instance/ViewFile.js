@@ -9,7 +9,7 @@ const path = require('path');
 
 const plugins = loadPlugins(path.join(__dirname, '../../plugins'));
 
-router.get("/instance/:id/files/view/:file", async (req, res) => {
+router.get(["/instance/:id/files/view/:file", "/instance/:id/files/edit/:file"], async (req, res) => {
     if (!req.user) return res.redirect('/');
 
     const { id, file } = req.params;

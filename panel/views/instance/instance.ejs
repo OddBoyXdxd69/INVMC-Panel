@@ -1,78 +1,28 @@
 <%- include('../components/template') %>
-<!-- Pro Scripts -->
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/xterm.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/xterm.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/addons/attach/attach.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/addons/fit/fit.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
 <style>
-    .glass-card {
-        background: rgba(15, 23, 42, 0.6);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 1rem;
-        transition: all 0.3s ease;
-    }
-    .glass-card:hover {
-        border-color: rgba(99, 102, 241, 0.3);
-        box-shadow: 0 0 20px rgba(99, 102, 241, 0.1);
-    }
-    .stat-label {
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: rgba(255, 255, 255, 0.4);
-        font-weight: 700;
-    }
-    .stat-value {
-        font-family: 'JetBrains Mono', monospace;
-        font-weight: 600;
-        color: #fff;
-    }
-    #terminal {
-        background: #000;
-        border-radius: 0 0 0.75rem 0.75rem;
-        padding: 10px;
-        min-height: 350px;
-    }
-    .terminal-header {
-        background: rgba(30, 41, 59, 0.8);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        padding: 0.75rem 1.25rem;
-        border-radius: 0.75rem 0.75rem 0 0;
-    }
-    .power-btn {
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        font-weight: 600;
-        letter-spacing: 0.025em;
-    }
-    .power-btn:hover {
-        transform: translateY(-1px);
-        filter: brightness(1.1);
-    }
-    .power-btn:active {
-        transform: scale(0.98);
-    }
-    .badge-status {
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.7rem;
-        font-weight: 800;
-        text-transform: uppercase;
-    }
+    .glass-card { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1rem; transition: all 0.3s ease; }
+    .glass-card:hover { border-color: rgba(99, 102, 241, 0.3); box-shadow: 0 0 20px rgba(99, 102, 241, 0.1); }
+    .stat-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.4); font-weight: 700; }
+    .stat-value { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #fff; }
+    #terminal { background: #000; border-radius: 0 0 0.75rem 0.75rem; padding: 10px; min-height: 350px; }
+    .terminal-header { background: rgba(30, 41, 59, 0.8); border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding: 0.75rem 1.25rem; border-radius: 0.75rem 0.75rem 0 0; }
+    .power-btn { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 600; letter-spacing: 0.025em; cursor: pointer; }
+    .power-btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
+    .power-btn:active { transform: scale(0.98); }
+    .power-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .badge-status { padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; border: 1px solid transparent; }
 </style>
 
 <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 opacity-0" id="main-content">
     <%- include('../components/instance') %>
 
-    <!-- Header: Server Identity -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
             <div class="flex items-center gap-3">
@@ -98,48 +48,37 @@
         </div>
     </div>
 
-    <!-- Live Stats Grid -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <div class="glass-card p-5">
             <p class="stat-label">CPU Usage</p>
-            <div class="flex items-end gap-2 mt-1">
-                <span id="cpu-usage" class="stat-value text-2xl">0%</span>
-            </div>
+            <span id="cpu-usage" class="stat-value text-2xl">0%</span>
             <div class="w-full bg-white/5 h-1.5 mt-3 rounded-full overflow-hidden">
                 <div id="cpu-bar" class="bg-indigo-500 h-full transition-all duration-500" style="width: 0%"></div>
             </div>
         </div>
         <div class="glass-card p-5">
             <p class="stat-label">Memory</p>
-            <div class="flex items-end gap-2 mt-1">
-                <span id="ram-usage" class="stat-value text-2xl">0 MB</span>
-                <span class="text-xs text-gray-500 mb-1">/ <%= instance.Resources ? instance.Resources.memory : instance.Memory %> MB</span>
-            </div>
+            <span id="ram-usage" class="stat-value text-2xl">0 MB</span>
             <div class="w-full bg-white/5 h-1.5 mt-3 rounded-full overflow-hidden">
                 <div id="ram-bar" class="bg-blue-500 h-full transition-all duration-500" style="width: 0%"></div>
             </div>
         </div>
         <div class="glass-card p-5">
             <p class="stat-label">Storage</p>
-            <div class="flex items-end gap-2 mt-1">
-                <span id="disk-usage" class="stat-value text-2xl">0 MB</span>
-                <span class="text-xs text-gray-500 mb-1">/ <%= instance.Resources ? instance.Resources.disk : instance.Disk %> MB</span>
-            </div>
+            <span id="disk-usage" class="stat-value text-2xl">0 MB</span>
             <div class="w-full bg-white/5 h-1.5 mt-3 rounded-full overflow-hidden">
-                <div id="disk-bar" class="bg-emerald-500 h-full transition-all duration-500" style="width: 15%"></div>
+                <div id="disk-bar" class="bg-emerald-500 h-full" style="width: 15%"></div>
             </div>
         </div>
         <div class="glass-card p-5">
-            <p class="stat-label">Network Address</p>
+            <p class="stat-label">Address</p>
             <div class="mt-1 flex items-center justify-between">
                 <span class="stat-value text-sm text-indigo-300"><%= instance.Node.address %>:<%= instance.Primary %></span>
                 <button onclick="copyAddr()" class="text-gray-500 hover:text-white transition-colors"><i class="fas fa-copy"></i></button>
             </div>
-            <p class="text-[10px] text-gray-600 mt-3 font-bold uppercase">SFTP PORT: <%= instance.Node.port %></p>
         </div>
     </div>
 
-    <!-- Terminal Area -->
     <div class="glass-card overflow-hidden">
         <div class="terminal-header flex justify-between items-center">
             <div class="flex items-center gap-2">
@@ -150,7 +89,6 @@
                 </div>
                 <span class="text-xs font-bold text-gray-400 uppercase tracking-widest ml-2">Secure Console</span>
             </div>
-            <div class="text-[10px] font-mono text-gray-600">Live Connection Active</div>
         </div>
         <div id="terminal"></div>
         <div class="bg-black/40 p-3 border-t border-white/5">
@@ -163,18 +101,13 @@
 </main>
 
 <script>
-    // GSAP Entry
     gsap.to("#main-content", { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" });
 
     const term = new Terminal({
         cursorBlink: true,
         fontFamily: 'JetBrains Mono, monospace',
         fontSize: 13,
-        theme: {
-            background: 'transparent',
-            foreground: '#e5e7eb',
-            cursor: '#6366f1'
-        },
+        theme: { background: 'transparent', foreground: '#e5e7eb', cursor: '#6366f1' },
         rows: 20
     });
     
@@ -183,13 +116,13 @@
     term.loadAddon(fitAddon);
     fitAddon.fit();
 
-    let protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    let ws = new WebSocket(`${protocol}://${window.location.host}/console/<%= req.params.id %>`);
-
-    ws.onmessage = (event) => {
-        try {
-            // Handle binary or text data
-            if (typeof event.data === 'string') {
+    let ws;
+    function connectWS() {
+        const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        ws = new WebSocket(`${protocol}://${window.location.host}/console/<%= req.params.id %>`);
+        
+        ws.onmessage = (event) => {
+            try {
                 if (event.data.startsWith('{')) {
                     const data = JSON.parse(event.data);
                     if (data.type === 'status') updateStatus(data.status);
@@ -198,59 +131,53 @@
                 } else {
                     term.write(event.data);
                 }
+            } catch (e) {
+                term.write(event.data);
             }
-        } catch (e) {
-            term.write(event.data);
-        }
-    };
+        };
+
+        ws.onclose = () => setTimeout(connectWS, 3000);
+        ws.onerror = () => ws.close();
+    }
+    connectWS();
 
     function updateStatus(status) {
         const badge = document.getElementById('status-badge');
         if (!badge) return;
         badge.textContent = status;
         if (status === 'online' || status === 'running') {
-            badge.className = 'badge-status bg-emerald-500/10 text-emerald-500 border border-emerald-500/20';
+            badge.className = 'badge-status bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
         } else if (status === 'starting') {
-            badge.className = 'badge-status bg-amber-500/10 text-amber-500 border border-amber-500/20 animate-pulse';
+            badge.className = 'badge-status bg-amber-500/10 text-amber-500 border-amber-500/20 animate-pulse';
         } else {
-            badge.className = 'badge-status bg-rose-500/10 text-rose-500 border border-rose-500/20';
+            badge.className = 'badge-status bg-rose-500/10 text-rose-500 border-rose-500/20';
         }
     }
 
     function updateStats(stats) {
         if (!stats) return;
-        
-        // Handle both formats (Panel stats and Docker raw stats)
-        const cpu = stats.cpu?.usage !== undefined ? stats.cpu.usage : (stats.cpu_stats ? calculateCPU(stats) : 0);
-        const ram = stats.memory?.used !== undefined ? stats.memory.used : (stats.memory_stats?.usage || 0);
-        const ramLimit = <%= instance.Resources ? instance.Resources.memory : instance.Memory %> * 1024 * 1024;
+        const cpu = stats.cpu?.usage || (stats.cpu_stats ? calculateCPU(stats) : 0);
+        const ram = stats.memory?.used || stats.memory_stats?.usage || 0;
+        const ramLimit = (<%= instance.Resources ? instance.Resources.memory : instance.Memory %> || 1024) * 1024 * 1024;
         
         document.getElementById('cpu-usage').textContent = Math.round(cpu) + '%';
         document.getElementById('cpu-bar').style.width = Math.min(cpu, 100) + '%';
         
         const ramMB = Math.round(ram / 1024 / 1024);
         document.getElementById('ram-usage').textContent = ramMB + ' MB';
-        const ramPercent = (ram / ramLimit) * 100;
-        document.getElementById('ram-bar').style.width = Math.min(ramPercent, 100) + '%';
+        document.getElementById('ram-bar').style.width = Math.min((ram / ramLimit) * 100, 100) + '%';
         
         if (stats.disk?.used !== undefined) {
             const diskMB = Math.round(stats.disk.used / 1024 / 1024);
             document.getElementById('disk-usage').textContent = diskMB + ' MB';
-            const diskLimit = <%= instance.Resources ? instance.Resources.disk : instance.Disk %> * 1024;
-            document.getElementById('disk-bar').style.width = Math.min((diskMB / diskLimit) * 100, 100) + '%';
         }
     }
 
-    let prevCpu = null;
-    let prevSystem = null;
     function calculateCPU(stats) {
         if (!stats.precpu_stats) return 0;
         const cpuDelta = stats.cpu_stats.cpu_usage.total_usage - stats.precpu_stats.cpu_usage.total_usage;
         const systemDelta = stats.cpu_stats.system_cpu_usage - stats.precpu_stats.system_cpu_usage;
-        if (systemDelta > 0 && cpuDelta > 0) {
-            return (cpuDelta / systemDelta) * stats.cpu_stats.online_cpus * 100;
-        }
-        return 0;
+        return systemDelta > 0 ? (cpuDelta / systemDelta) * stats.cpu_stats.online_cpus * 100 : 0;
     }
 
     document.getElementById('input').addEventListener('keypress', (e) => {
@@ -261,38 +188,26 @@
     });
 
     async function powerAction(action) {
-        const buttons = document.querySelectorAll('.power-btn');
-        buttons.forEach(b => b.disabled = true);
-        
         try {
             await axios.post(`/instance/<%= req.params.id %>/power/${action}`);
             term.write(`\r\n\u001b[1m\u001b[33m[INVMC] \u001b[0mSent ${action} request...\r\n`);
         } catch (error) {
-            console.error('Power action failed:', error);
-            alert('Power action failed: ' + (error.response?.data?.error || 'Node connection error'));
-        } finally {
-            setTimeout(() => {
-                buttons.forEach(b => b.disabled = false);
-            }, 1000);
+            alert('Error: ' + (error.response?.data?.error || 'Failed to connect to node'));
         }
     }
 
     function copyAddr() {
         navigator.clipboard.writeText('<%= instance.Node.address %>:<%= instance.Primary %>');
-        alert('Address copied!');
+        alert('Copied!');
     }
 
     window.addEventListener('resize', () => fitAddon.fit());
     
-    // Initial stats fetch
-    setTimeout(() => {
-        const statsWs = new WebSocket(`${protocol}://${window.location.host}/stats/<%= req.params.id %>`);
-        statsWs.onmessage = (event) => {
-            try {
-                const stats = JSON.parse(event.data);
-                updateStats(stats);
-            } catch (e) {}
-        };
-    }, 1000);
+    // Stats polling fallback if WS doesn't send them
+    setInterval(() => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ event: 'stats' }));
+        }
+    }, 2000);
 </script>
 <%- include('../components/footer') %>
