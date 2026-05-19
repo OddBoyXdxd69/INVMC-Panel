@@ -223,7 +223,7 @@ async function updateDatabaseWithNewInstance(
     Id,
     Node: node,
     User: userId,
-    ContainerId: responseData.containerId,
+    ContainerId: Id, // Use the short ID as the ContainerId (matches the container name)
     VolumeId: Id,
     Memory: parseInt(memory),
     Disk: disk,
