@@ -113,26 +113,57 @@ wss.on('connection', (ws, req) => {
 
     async function setupConsole(ws, container) {
         try {
+            // 1. Send initial status
             const data = await container.inspect();
             ws.send(JSON.stringify({ type: 'status', status: data.State.Running ? 'online' : 'offline' }));
 
-            const logs = await container.logs({ stdout: true, stderr: true, tail: 20 });
-            ws.send(logs.toString());
-
-            const stream = await container.attach({ stream: true, stdout: true, stderr: true, stdin: true, hijack: true });
+            // 2. Start following logs (Real-time stream)
+            // Using 'follow: true' with 'tail: 50' gives the last 50 lines PLUS all new lines
+            const stream = await container.logs({
+                follow: true,
+                stdout: true,
+                stderr: true,
+                tail: 50,
+                timestamps: false
+            });
+            
             logStream = stream;
-            stream.on('data', chunk => ws.send(chunk.toString()));
 
-            ws.on('message', (message) => {
+            stream.on('data', chunk => {
+                if (ws.readyState === WebSocket.OPEN) {
+                    ws.send(chunk.toString());
+                }
+            });
+
+            // 3. Handle incoming commands from panel
+            ws.on('message', async (message) => {
                 try {
                     const msg = JSON.parse(message);
-                    if (msg.event === 'cmd' && msg.command) stream.write(msg.command + '\n');
+                    if (msg.event === 'cmd' && msg.command) {
+                        // For commands, we need a separate attach stream
+                        const execStream = await container.attach({
+                            stream: true,
+                            stdin: true,
+                            stdout: false,
+                            stderr: false,
+                            hijack: true
+                        });
+                        execStream.write(msg.command + '\n');
+                        execStream.end();
+                    }
                 } catch (e) {}
             });
+
+            stream.on('error', err => {
+                log.error('Log stream error:', err);
+            });
+
         } catch (e) {
-            ws.send(`\r\n[INVMC] Console error: ${e.message}\r\n`);
+            log.error('Console setup failed:', e);
+            ws.send(`\r\n\x1b[31m[INVMC] Failed to connect to server console: ${e.message}\x1b[0m\r\n`);
         }
     }
+
 
     async function setupStats(ws, container, id) {
         const sendStats = async () => {
