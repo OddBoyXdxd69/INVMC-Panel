@@ -273,11 +273,23 @@
     });
 
     async function powerAction(action) {
+        const buttons = document.querySelectorAll('.power-btn');
+        buttons.forEach(b => b.disabled = true);
+        
         try {
             await axios.post(`/instance/<%= req.params.id %>/power/${action}`);
             term.write(`\r\n\x1b[33m[INVMC] System signal sent: ${action.toUpperCase()}\x1b[0m\r\n`);
         } catch (error) {
-            term.write(`\r\n\x1b[31m[ERROR] Node communication failed: ${error.message}\x1b[0m\r\n`);
+            const msg = error.response?.data?.error || error.message;
+            if (msg.includes('already')) {
+                term.write(`\r\n\x1b[32m[INVMC] Server is already in the requested state: ${action.toUpperCase()}\x1b[0m\r\n`);
+            } else {
+                term.write(`\r\n\x1b[31m[ERROR] Node communication failed: ${msg}\x1b[0m\r\n`);
+            }
+        } finally {
+            setTimeout(() => {
+                buttons.forEach(b => b.disabled = false);
+            }, 1000);
         }
     }
 
