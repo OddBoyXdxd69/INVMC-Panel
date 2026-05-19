@@ -120,7 +120,7 @@ wss.on('connection', (ws, req) => {
             const data = await container.inspect();
             ws.send(JSON.stringify({ type: 'status', status: data.State.Running ? 'online' : 'offline' }));
 
-            // 2. Stream logs using follow
+            // 2. Stream logs using follow (works even if stopped)
             const stream = await container.logs({
                 follow: true,
                 stdout: true,
@@ -174,8 +174,7 @@ wss.on('connection', (ws, req) => {
                     ws.send(JSON.stringify({
                         type: 'stats',
                         stats: {
-                            // Basic CPU usage calculation for one snapshot
-                            cpu: { usage: stats.cpu_stats.online_cpus || 1 }, 
+                            cpu: { usage: 0 }, // Simplified for stability
                             memory: { used: stats.memory_stats.usage },
                             disk: { used: volumeSize * 1024 * 1024 },
                             status: stats.memory_stats.usage > 0 ? 'online' : 'offline'

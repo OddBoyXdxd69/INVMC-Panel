@@ -1,72 +1,22 @@
 <%- include('../components/template') %>
 <!-- Pro Scripts -->
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/xterm.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/xterm.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/addons/attach/attach.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/addons/fit/fit.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
 <style>
-    .glass-card {
-        background: rgba(15, 23, 42, 0.7);
-        backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 1rem;
-        transition: all 0.3s ease;
-    }
-    .glass-card:hover {
-        border-color: rgba(99, 102, 241, 0.4);
-        box-shadow: 0 0 30px rgba(99, 102, 241, 0.15);
-    }
-    .stat-label {
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.15em;
-        color: rgba(255, 255, 255, 0.5);
-        font-weight: 800;
-    }
-    .stat-value {
-        font-family: 'JetBrains Mono', monospace;
-        font-weight: 700;
-        color: #fff;
-    }
-    #terminal {
-        background: #000;
-        border-radius: 0 0 0.75rem 0.75rem;
-        padding: 12px;
-        min-height: 400px;
-    }
-    .terminal-header {
-        background: rgba(30, 41, 59, 0.9);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 0.85rem 1.5rem;
-        border-radius: 0.75rem 0.75rem 0 0;
-    }
-    .power-btn {
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.6rem;
-        font-weight: 700;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
-        font-size: 0.75rem;
-    }
-    .power-btn:hover {
-        transform: translateY(-2px);
-        filter: brightness(1.2);
-    }
-    .badge-status {
-        padding: 0.3rem 0.9rem;
-        border-radius: 9999px;
-        font-size: 0.7rem;
-        font-weight: 900;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
+    .glass-card { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1rem; transition: all 0.3s ease; }
+    .glass-card:hover { border-color: rgba(99, 102, 241, 0.4); box-shadow: 0 0 30px rgba(99, 102, 241, 0.15); }
+    .stat-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: rgba(255, 255, 255, 0.5); font-weight: 800; }
+    .stat-value { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #fff; }
+    #terminal { background: #000; border-radius: 0 0 0.75rem 0.75rem; padding: 12px; min-height: 400px; }
+    .terminal-header { background: rgba(30, 41, 59, 0.9); border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding: 0.85rem 1.5rem; border-radius: 0.75rem 0.75rem 0 0; }
+    .power-btn { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; justify-content: center; gap: 0.6rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; font-size: 0.75rem; }
+    .power-btn:hover { transform: translateY(-2px); filter: brightness(1.2); }
+    .badge-status { padding: 0.3rem 0.9rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; }
 </style>
 
 <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 opacity-0" id="main-content">
@@ -163,7 +113,8 @@
 </main>
 
 <script>
-    gsap.to("#main-content", { opacity: 1, y: 0, duration: 0.8, ease: "power4.out" });
+    // GSAP Entry
+    gsap.to("#main-content", { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" });
 
     const term = new Terminal({
         cursorBlink: true,
@@ -235,7 +186,8 @@
     function updateStats(stats) {
         if (!stats) return;
         
-        const cpu = stats.cpu?.usage || (stats.cpu_stats ? calculateCPU(stats) : 0);
+        // Handle both formats (Panel stats and Docker raw stats)
+        const cpu = stats.cpu?.usage || 0;
         const ram = stats.memory?.used || stats.memory_stats?.usage || 0;
         const ramLimit = (<%= instance.Memory %> || 1024) * 1024 * 1024;
         
@@ -244,6 +196,7 @@
         
         const ramMB = Math.round(ram / 1024 / 1024);
         document.getElementById('ram-usage').textContent = ramMB + ' MB';
+        const ramPercent = (ram / ramLimit) * 100;
         document.getElementById('ram-bar').style.width = Math.min((ram / ramLimit) * 100, 100) + '%';
         
         if (stats.disk?.used !== undefined || stats.volumeSize !== undefined) {
@@ -253,14 +206,6 @@
             const diskLimitMB = (<%= parseInt(instance.Disk) || 1 %>) * 1024;
             document.getElementById('disk-bar').style.width = Math.min((diskMB / diskLimitMB) * 100, 100) + '%';
         }
-    }
-
-    function calculateCPU(stats) {
-        if (!stats.precpu_stats || !stats.cpu_stats) return 0;
-        const cpuDelta = stats.cpu_stats.cpu_usage.total_usage - stats.precpu_stats.cpu_usage.total_usage;
-        const systemDelta = stats.cpu_stats.system_cpu_usage - stats.precpu_stats.system_cpu_usage;
-        const cores = stats.cpu_stats.online_cpus || 1;
-        return systemDelta > 0 ? (cpuDelta / systemDelta) * cores * 100 : 0;
     }
 
     document.getElementById('input').addEventListener('keypress', (e) => {
@@ -273,23 +218,11 @@
     });
 
     async function powerAction(action) {
-        const buttons = document.querySelectorAll('.power-btn');
-        buttons.forEach(b => b.disabled = true);
-        
         try {
             await axios.post(`/instance/<%= req.params.id %>/power/${action}`);
             term.write(`\r\n\x1b[33m[INVMC] System signal sent: ${action.toUpperCase()}\x1b[0m\r\n`);
         } catch (error) {
-            const msg = error.response?.data?.error || error.message;
-            if (msg.includes('already')) {
-                term.write(`\r\n\x1b[32m[INVMC] Server is already in the requested state: ${action.toUpperCase()}\x1b[0m\r\n`);
-            } else {
-                term.write(`\r\n\x1b[31m[ERROR] Node communication failed: ${msg}\x1b[0m\r\n`);
-            }
-        } finally {
-            setTimeout(() => {
-                buttons.forEach(b => b.disabled = false);
-            }, 1000);
+            term.write(`\r\n\x1b[31m[ERROR] Node communication failed: ${error.message}\x1b[0m\r\n`);
         }
     }
 
@@ -301,9 +234,11 @@
 
     window.addEventListener('resize', () => fitAddon.fit());
     
-    // Fallback stats request
+    // Stats polling fallback if WS doesn't send them
     setInterval(() => {
-        if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ event: 'stats' }));
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ event: 'stats' }));
+        }
     }, 2000);
 </script>
 <%- include('../components/footer') %>
