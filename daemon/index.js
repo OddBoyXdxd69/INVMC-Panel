@@ -59,17 +59,13 @@ app.get('/stats', async (req, res) => {
         const stats = {
             memory: {
                 total: os.totalmem(),
-                free: os.freemem(),
                 used: os.totalmem() - os.freemem(),
-                percent: ((os.totalmem() - os.freemem()) / os.totalmem() * 100).toFixed(2)
+                percent: (((os.totalmem() - os.freemem()) / os.totalmem()) * 100).toFixed(2)
             },
             cpu: {
-                usage: (os.loadavg()[0] * 100 / os.cpus().length).toFixed(2),
-                cores: os.cpus().length
+                usage: (os.loadavg()[0] * 100 / os.cpus().length).toFixed(2)
             },
-            uptime: `${Math.floor(os.uptime() / 86400)}d ${Math.floor((os.uptime() % 86400) / 3600)}h`,
-            status: 'Online',
-            timestamp: Date.now()
+            status: 'Online'
         };
         res.json(stats);
     } catch (e) {
@@ -91,13 +87,11 @@ wss.on('connection', (ws, req) => {
     let isAuthenticated = false;
     let currentContainer = null;
     let logStream = null;
-    let statsInterval = null;
+    let statsTask = null;
 
     ws.on('message', async (message) => {
         let msg = {};
-        try {
-            msg = JSON.parse(message);
-        } catch (e) { return; }
+        try { msg = JSON.parse(message); } catch (e) { return; }
 
         if (msg.event === 'auth' && msg.args) {
             if (msg.args[0] === config.key) {
@@ -107,82 +101,67 @@ wss.on('connection', (ws, req) => {
                 const type = parts[1]; // exec or stats
 
                 if (!containerId) return ws.close(1008, "No Container ID");
-
                 currentContainer = docker.getContainer(containerId);
                 
-                if (type === 'exec') {
-                    setupConsole(ws, currentContainer);
-                } else if (type === 'stats') {
-                    setupStats(ws, currentContainer, containerId);
-                }
+                if (type === 'exec') setupConsole(ws, currentContainer);
+                else if (type === 'stats') setupStats(ws, currentContainer, containerId);
             } else {
                 ws.close(1008, "Auth Failed");
-            }
-        } else if (isAuthenticated && currentContainer) {
-            if (msg.event === 'cmd' && msg.command) {
-                // Command handling is now inside setupConsole for direct stream access
-            } else if (msg.event && msg.event.startsWith('power:')) {
-                const action = msg.event.split(':')[1];
-                try {
-                    if (action === 'start') await currentContainer.start();
-                    else if (action === 'stop') await currentContainer.stop();
-                    else if (action === 'restart') await currentContainer.restart();
-                    else if (action === 'kill') await currentContainer.kill();
-                } catch (e) {
-                    ws.send(`\r\n\x1b[31m[INVMC] Action failed: ${e.message}\x1b[0m\r\n`);
-                }
             }
         }
     });
 
     async function setupConsole(ws, container) {
         try {
-            // Send tail logs
-            const logs = await container.logs({ stdout: true, stderr: true, tail: 50 });
+            const data = await container.inspect();
+            ws.send(JSON.stringify({ type: 'status', status: data.State.Running ? 'online' : 'offline' }));
+
+            const logs = await container.logs({ stdout: true, stderr: true, tail: 20 });
             ws.send(logs.toString());
 
-            // Attach for live stream
             const stream = await container.attach({ stream: true, stdout: true, stderr: true, stdin: true, hijack: true });
             logStream = stream;
-
             stream.on('data', chunk => ws.send(chunk.toString()));
 
             ws.on('message', (message) => {
                 try {
                     const msg = JSON.parse(message);
-                    if (msg.event === 'cmd' && msg.command) {
-                        stream.write(msg.command + '\n');
-                    }
+                    if (msg.event === 'cmd' && msg.command) stream.write(msg.command + '\n');
                 } catch (e) {}
             });
         } catch (e) {
-            ws.send(`\r\n\x1b[31m[INVMC] Console error: ${e.message}\x1b[0m\r\n`);
+            ws.send(`\r\n[INVMC] Console error: ${e.message}\r\n`);
         }
     }
 
     async function setupStats(ws, container, id) {
         const sendStats = async () => {
             try {
-                const stats = await container.stats({ stream: false });
-                const volumeSize = await getVolumeSize(id);
-                stats.volumeSize = volumeSize;
-                ws.send(JSON.stringify(stats));
+                const s1 = await new Promise((resolve, reject) => container.stats({ stream: false }, (err, s) => err ? reject(err) : resolve(s)));
+                const s2 = await new Promise((resolve, reject) => setTimeout(async () => {
+                   container.stats({ stream: false }, (err, s) => err ? reject(err) : resolve(s));
+                }, 500));
+                
+                const cpuDelta = s2.cpu_stats.cpu_usage.total_usage - s1.cpu_stats.cpu_usage.total_usage;
+                const sysDelta = s2.cpu_stats.system_cpu_usage - s1.cpu_stats.system_cpu_usage;
+                const cpuUsage = sysDelta > 0 ? (cpuDelta / sysDelta) * s2.cpu_stats.online_cpus * 100 : 0;
+                
+                ws.send(JSON.stringify({
+                    type: 'stats',
+                    stats: {
+                        cpu: { usage: cpuUsage.toFixed(2) },
+                        memory: { used: s2.memory_stats.usage }
+                    }
+                }));
             } catch (e) {}
         };
-        sendStats();
-        statsInterval = setInterval(sendStats, 2000);
+        statsTask = setInterval(sendStats, 2000);
     }
 
     ws.on('close', () => {
         if (logStream) logStream.destroy();
-        if (statsInterval) clearInterval(statsInterval);
+        if (statsTask) clearInterval(statsTask);
     });
 });
 
 server.listen(config.port, () => log.info(`INVMC Daemon listening on port ${config.port}`));
-
-// Global Error Handler
-app.use((err, req, res, next) => {
-    log.error(err.stack);
-    res.status(500).send('Daemon Error');
-});
