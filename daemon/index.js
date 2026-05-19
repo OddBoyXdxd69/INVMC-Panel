@@ -79,7 +79,7 @@ app.get('/stats', async (req, res) => {
 app.get('/', async (req, res) => {
     try {
         const dockerInfo = await docker.info();
-        res.json({ status: 'Online', docker: dockerInfo });
+        res.json({ status: 'Online', online: true, versionFamily: 1, versionRelease: 'invmc ' + config.version, docker: dockerInfo });
     } catch (e) {
         res.status(500).json({ status: 'Error', error: e.message });
     }
